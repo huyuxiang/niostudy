@@ -1,4 +1,4 @@
-package douglea.test1;
+package douglea.test3;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,19 +13,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MultipleReactor implements Runnable {
+	
 	final Selector selector;
 	final ServerSocketChannel serverSocket;
 	
-	MultipleReactor(int port) throws IOException {
+	MultipleReactor (int port) throws IOException {
 		selector = Selector.open();
 		serverSocket = ServerSocketChannel.open();
 		serverSocket.socket().bind(
 				new InetSocketAddress(port));
 		serverSocket.configureBlocking(false);
-		SelectionKey sk = serverSocket.register(
+		SelectionKey key = serverSocket.register(
 				selector, 
 				SelectionKey.OP_ACCEPT);
-		sk.attach(new Acceptor());
+		key.attach(new Acceptor());
 	}
 	
 	public void run() {
@@ -35,49 +36,55 @@ public class MultipleReactor implements Runnable {
 				Set<SelectionKey> selected = selector.selectedKeys();
 				Iterator<SelectionKey> it = selected.iterator();
 				while(it.hasNext()) {
-					dispatch((SelectionKey)(it.next()));
+					dispatch((SelectionKey) it.next());
 				}
 				selected.clear();
-			} 
+			}
 		} catch(IOException e) {
+			
 		}
 	}
 	
-	void dispatch(SelectionKey k)  {
-		Runnable r = (Runnable) (k.attachment());
-		if(r!=null)
+	void dispatch(SelectionKey k) {
+		Runnable r = (Runnable) k.attachment();
+		if(r!=null) 
 			r.run();
 	}
+	
 	Selector[] selectors;
 	int next = 0;
 	class Acceptor implements Runnable {
 		public synchronized void run() {
 			try {
 				SocketChannel c = serverSocket.accept();
-				if(c!=null)
+				if(c!=null) 
 					new Handler(selectors[next], c);
-				if(++next==selectors.length) next = 0;
+				if(++next ==selectors.length) next = 0;
 			} catch(IOException e) {
 				
 			}
 		}
 	}
+	
+	
 	static final int MAXIN = 1024;
 	static final int MAXOUT = 1024;
 	
 	static final int DEFAULT_POOL_SIZE = 100;
-	static final ExecutorService pool = Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
+	static final ExecutorService pool = Executors.newFixedThreadPool(
+			DEFAULT_POOL_SIZE);
 	
 	class Handler implements Runnable {
-		final SocketChannel socket;
-		final SelectionKey sk ;
+		final SocketChannel socket; 
+		final SelectionKey sk;
 		ByteBuffer input = ByteBuffer.allocate(MAXIN);
 		ByteBuffer output = ByteBuffer.allocate(MAXOUT);
 		
-		static final int READING = 0, SENDING = 1, PROCESSING = 3;
+		static final int READING = 0, SENDING = 1 , PROCESSING = 3;
 		int state = READING;
 		
-		Handler(Selector sel, SocketChannel c) throws IOException {
+		Handler(Selector sel, SocketChannel c ) 
+			throws IOException {
 			socket = c;
 			c.configureBlocking(false);
 			sk = socket.register(sel, 0);
@@ -88,10 +95,10 @@ public class MultipleReactor implements Runnable {
 		
 		public void run() {
 			try {
-				if(state == READING) read();
-				else if(state == SENDING) send();
-			} catch (IOException e) {
-				e.printStackTrace();
+				if(state==READING) read();
+				else if(state==SENDING) send();
+			} catch(IOException e ) {
+				
 			}
 		}
 		
@@ -120,15 +127,14 @@ public class MultipleReactor implements Runnable {
 			sk.interestOps(SelectionKey.OP_WRITE);
 		}
 		
-		//--------------
 		boolean inputIsComplete() {
 			return false;
-			
 		}
+		
 		boolean outputIsComplete() {
 			return false;
-			
 		}
+		
 		void process() {
 			
 		}

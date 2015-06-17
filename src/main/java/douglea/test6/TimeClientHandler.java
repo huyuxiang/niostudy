@@ -31,13 +31,6 @@ public class TimeClientHandler implements Runnable {
 	}
 	
 	public void run() {
-		try {
-			doConnect();
-			
-		} catch(IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
 		while(!stop) {
 			try {
 				selector.select(1000);
@@ -72,6 +65,24 @@ public class TimeClientHandler implements Runnable {
 	}
 	
 	private void handlerInput(SelectionKey key) throws IOException {
-		
+		if(key.isValid()) {
+			SocketChannel sc = (SocketChannel) key.channel();
+			if(key.isConnectable()) {
+				if(sc.finishConnect()) {
+					sc.register(selector, SelectionKey.OP_READ);
+					//doWrite(sc);
+				} else {
+					System.exit(1);
+				}
+			}
+			if(key.isReadable()) {
+				ByteBuffer readBuffer = ByteBuffer.allocate(1024);
+				int readBytes = sc.read(readBuffer);
+				if(readBytes>0) {
+					readBuffer.flip();
+					
+				}
+			}
+		}
 	}
 }

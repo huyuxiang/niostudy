@@ -12,9 +12,17 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import daily.template.reactor.ReactorPool.MultipleReactor;
+
 
 //reactor 1: setup
 public class MultithreadedReactor implements Runnable {
+	
+	public static void main(String args[] ) throws IOException {
+		MultithreadedReactor server = new MultithreadedReactor(8000);
+		new Thread(server).start();
+	}
+	
 	final Selector selector;
 	final ServerSocketChannel serverSocket;
 	
@@ -79,9 +87,11 @@ class Handler implements Runnable {
 	ByteBuffer output = ByteBuffer.allocate(MAXOUT);
 	static final int READING = 0, SENDING = 1;
 	int state = READING;
+	Selector selector;
 	
 	Handler(Selector sel, SocketChannel c) throws IOException {
 		socket = c;
+		selector = sel;
 		c.configureBlocking(false);
 		//Optionally try first read now
 		sk = socket.register(sel, 0);
@@ -137,6 +147,7 @@ class Handler implements Runnable {
 		process();
 		state = SENDING;//or rebind attachment
 		sk.interestOps(SelectionKey.OP_WRITE);
+		selector.wakeup();
 	}
 	
 	class Processer implements Runnable {

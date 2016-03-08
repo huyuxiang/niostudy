@@ -1,6 +1,5 @@
 package daily.template.headfirst.ch11.a1;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import net.sf.cglib.proxy.Callback;

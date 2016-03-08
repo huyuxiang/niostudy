@@ -9,6 +9,10 @@ public class PersonBeanImpl implements PersonBean {
 	int ratingCount = 0;
 	@Override
 	public String getName() {
+		int j = 0;
+		for(int i=0;i<10;i++) {
+			j += i;
+		}
 		return name;
 	}
 	@Override

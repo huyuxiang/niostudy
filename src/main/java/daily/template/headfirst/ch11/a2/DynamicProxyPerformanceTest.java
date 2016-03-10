@@ -113,7 +113,7 @@ public class DynamicProxyPerformanceTest {
 		}
 		
 		public Object invoke(Object object, Method method, Object[] objects) throws Throwable {
-			return method.invoke(delegate, objects);
+			return method.invoke(object, objects);
 		}
 	}
 	

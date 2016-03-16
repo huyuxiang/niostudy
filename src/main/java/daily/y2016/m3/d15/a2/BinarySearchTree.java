@@ -1,6 +1,7 @@
-package daily.template.datastructures.ch04;
+package daily.y2016.m3.d15.a2;
 
-//checked 20160314
+import daily.template.datastructures.ch04.UnderflowException;
+
 public class BinarySearchTree<T extends Comparable<? super T>> {
 	
 	private static class BinaryNode<T> {
@@ -18,7 +19,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		}
 	}
 	
-	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+	
 	public BinaryNode<T> root;
 	
 	public BinarySearchTree() {
@@ -32,16 +33,17 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		return root ==null;
 	}
 	
+	
 	public boolean contains(T x) {
 		return contains(x, root);
 	}
 	public T findMin() {
-		if(isEmpty())
+		if(isEmpty()) 
 			throw new UnderflowException();
 		return findMin(root).element;
 	}
 	public T findMax() {
-		if(isEmpty()) 
+		if(isEmpty())
 			throw new UnderflowException();
 		return findMax(root).element;
 	}
@@ -52,25 +54,26 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		root = remove(x, root);
 	}
 	public void printTree() {
-		if(isEmpty())
+		if(isEmpty()) 
 			System.out.println("Empty tree");
 		else 
 			printTree(root);
 	}
 	
 	
+	
 	private boolean contains(T x, BinaryNode<T> t) {
-		if(t == null)
+		if(t==null)
 			return false;
 		
 		int compareResult = x.compareTo(t.element);
 		
 		if(compareResult<0)
 			return contains(x, t.left);
-		else if(compareResult>0) 
+		else if(compareResult>0)
 			return contains(x, t.right);
 		else 
-			return true; //Match
+			return true;
 	}
 	private BinaryNode<T> findMin(BinaryNode<T> t) {
 		if(t==null)
@@ -81,30 +84,32 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		return findMin(t.left);
 	}
 	private BinaryNode<T> findMax(BinaryNode<T> t) {
-		if(t !=null)
+		if(t!=null)
 			while(t.right!=null)
 				t = t.right;
+		
 		return t;
 	}
 	
 	
 	private BinaryNode<T> insert(T x, BinaryNode<T> t) {
 		if(t==null)
-			return new BinaryNode<T>(x, null, null);
+			return new BinaryNode<T> (x, null, null);
 		
 		int compareResult = x.compareTo(t.element);
 		
-		if(compareResult <0)
+		if(compareResult<0)
 			t.left = insert(x, t.left);
 		else if(compareResult>0)
 			t.right = insert(x, t.right);
-		else 
-			; //Duplicate; do nothing
+		else
+			;
+		
 		return t;
 	}
 	private BinaryNode<T> remove(T x, BinaryNode<T> t) {
 		if(t==null)
-			return t; //Item not found; do nothing
+			return t;
 		
 		int compareResult = x.compareTo(t.element);
 		
@@ -117,6 +122,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 			t.right = remove(t.element, t.right);
 		} else 
 			t = (t.left!=null)?t.left:t.right;
+		
 		return t;
 	}
 	private void printTree(BinaryNode<T> t) {
@@ -126,4 +132,5 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 			printTree(t.right);
 		}
 	}
+	
 }

@@ -1,21 +1,36 @@
 package daily.template.concurrentapiExample;
 
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.TransferQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ConcurrentApiExample {
 	
@@ -23,14 +38,25 @@ public class ConcurrentApiExample {
 		testExecutors();
 		testFuture();
 		testSynchronized();
-		
-		
-		
-		testForkJoin_findMax();
+		testReentrantLock();
+		testCondition();
+		testSemaphore();
+		testReadWriteLock();
+		testCountDownLatch();
+		testCyclicBarrier();
+		testPhaser();
+		testBlinkingPhaser();
+		testAtomicInteger();
+		testBlockingQueue();
+		testTransferQueue();
+		testCompletionService();
 		testConcurrentMap();
+		testForkJoin_findMax();
+		
 	}
 	
 	
+
 	public static void testExecutors() {
 		// FixedThreadPool Construction 
 		final Executor executor = Executors.newFixedThreadPool(4);
@@ -169,6 +195,310 @@ public class ConcurrentApiExample {
 		lock.unlock();
 	}
 	
+	
+	public static void testSemaphore() {
+		//Constructor - pass in the number of permits
+		final Semaphore semaphore = new Semaphore(4, true);
+		//final Semaphore semaphore = new Semaphore(4);
+		//Threads attempting to acquire will block until
+		//the specified number of releases are counted
+		
+		try {
+			semaphore.acquire();
+		} catch(InterruptedException e) {
+			
+		}
+		semaphore.release();
+		
+		//tryAcquire is like acquire, except that it
+		//times out after an(optional) specified time.
+		try {
+			if(semaphore.tryAcquire(5, TimeUnit.SECONDS)) {
+				//Do something
+			}
+		} catch(InterruptedException e) {
+			
+		}
+		
+		//If no time is specified, times out immediately
+		// if not acquired
+		if(semaphore.tryAcquire()) {
+			//Do something
+		}
+	}
+	
+	private static void testReadWriteLock() {
+		//Construct the ReadWriteLock
+		final ReadWriteLock lock = new ReentrantReadWriteLock();
+		// new ReentrantReadWriteLock(true)
+		
+		//Acquire the read lock
+		try {
+			lock.readLock().lock();
+			// or 
+			lock.readLock().tryLock(1L, TimeUnit.SECONDS);
+		} catch(InterruptedException e) {}
+		
+		//Release the read lock
+		lock.readLock().unlock();
+		
+		//Acquire the write lock
+		try {
+			lock.writeLock().lock();
+			//or
+			lock.writeLock().tryLock(1L, TimeUnit.SECONDS);
+		} catch(InterruptedException e) {}
+		
+		//Release the lock
+		lock.writeLock().unlock();
+		//or
+		lock.readLock().unlock();
+		
+		lock.readLock().lock();
+		lock.writeLock().unlock();
+	}
+	
+	public static void testCountDownLatch() {
+		//Constructor - pass in the pass count
+		final CountDownLatch countDownLatch = new CountDownLatch(4);
+		// Threads attempting to acquire
+		//will block until the specified
+		//number of release is counted.
+		Thread acquireThread = new Thread() {
+			public void run() {
+				try {
+					countDownLatch.await();
+				} catch(InterruptedException e) {}
+			}
+		};
+		
+		Thread releaseThread = new Thread() {
+			public void run() {
+				countDownLatch.countDown();
+			}
+		};
+		
+		//timed await is like await except that
+		//it times out after the specified
+		// timeout period
+		try {
+			countDownLatch.await(1L, TimeUnit.DAYS);
+		} catch(InterruptedException e) {}
+	}
+	
+	public static void testCyclicBarrier() {
+		//Contructor specifies # of parties, and an
+		//optional Runnable that gets called when the 
+		//barrier is opened
+		final CyclicBarrier cyclicBarrier = new CyclicBarrier(4, new Runnable() {
+			public void run() {
+				System.out.println("Runnable hit");
+			}
+		});
+		
+		//Each call to await blocks, until the number
+		//specified in the constructor is reached.
+		//Then the Runnable executes and all can pass.
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					cyclicBarrier.await();
+				} catch(BrokenBarrierException | InterruptedException e) {}
+			}
+		};
+		
+		Thread thread1 = new Thread() {
+			public void run() {
+				try {
+					cyclicBarrier.await(1, TimeUnit.SECONDS);
+				} catch(BrokenBarrierException | InterruptedException | TimeoutException e) {}
+			}
+		};
+		
+		//reset() allows the barrier to be reused
+		//Any waiting threads will throw 
+		//a BrokenBarrierException
+		cyclicBarrier.reset();
+	}
+	
+	public static void testPhaser() {
+		Phaser phaser = new Phaser(4) {
+			@Override
+			//Perform when all parties arrive
+			protected boolean onAdvance(int phase, 
+						int registeredParties) {
+			//	return true if the Phaser should
+			//	terminate no advance, else false
+			return false;
+			}
+		};
+		
+		int phase = phaser.arriveAndAwaitAdvance();
+		/*int phase = phaser.arrive();
+		int phase = phaser.awaitAdvance(int phase);
+		int phase = phaser.arriveAndDeregister();
+		int phase = phaser.register();
+		int phase = phaser.bulkRegister(int parties);*/
+	}
+	
+	public static void testBlinkingPhaser() {
+		/*private Phaser phaser = new Phaser(21) {
+			protected boolean onAdvance(int phase, int registeredParties) {
+				return phase >= BLINK_COUNT - 1 || registeredParties == 0;
+			}
+		};*/
+		
+		/*public void start() {
+			Random rand = new Random();
+			for(final JComponent comp: buttonArray ) {
+				Thread thread = new Thread() {
+					public void run() {
+						try {
+							do {
+								Color defaultColor = comp.getBackgroud();
+								Color newColor = new Color(rand.nextInt());
+								changeColor(comp, newColor);
+								Thread.sleep(500+ rand.nextInt(3000));
+								changeColor(comp, defaultColor);
+								Toolkit.getDefaultToolkit().beep();
+								Thread.sleep(2000);
+								phaser.arriveAndAwaitAdvance();
+							} while(!phaser.isTerminated());
+							
+						} catch(InterruptedException e) {
+							Thread.currentThread.interrupted();
+						}
+					}
+				};
+				thread.start();
+			}
+		}*/
+	}
+	
+	public static void testAtomicInteger() {
+		//Construct the AtomicVariable,
+		//assigning an initial value
+		
+		final AtomicInteger atomicInteger = new AtomicInteger(1);
+		
+		//compareAndSet does an atomic
+		//"check and set if".
+		// Value is only set 
+		// if original value == assumed value
+		int assumedValue = 10, newValue = 5;
+		
+		boolean success = atomicInteger.compareAndSet(assumedValue, newValue);
+		
+		//Arithmetic functions on atomics
+		//perform their computations in
+		// an atomic fashion and return
+		//the result.
+		int result = atomicInteger.incrementAndGet();
+		
+	}
+	
+	public static void testBlockingQueue() {
+		//Constructor -- pass in the upper bound
+		final BlockingQueue queue = new ArrayBlockingQueue(4);
+		
+		//Threads attempting to put will block
+		//until there is room in the buffer
+		Thread putThread = new Thread() {
+			public void run() {
+				try {
+					queue.put(1);
+				} catch(InterruptedException e) {
+					
+				}
+			}
+		};
+		
+		//offer is like put except that it times out 
+		//after the specified timeout period
+		Thread offerThread = new Thread() {
+			public void run() {
+				try {
+					queue.offer(2, 1L, TimeUnit.SECONDS);
+				} catch(InterruptedException e) {}
+				
+			}
+		};
+		//Threads attempting to poll will return 
+		// null if there is nothing on the queue
+		Thread poolThread = new Thread() {
+			public void run() {
+				queue.poll();
+			}
+			
+		};
+		//Threads attempting to take will block
+		//until the there is something to take
+		Thread takeThread = new Thread() {
+			public void run() {
+				try {
+					queue.take();
+				} catch (InterruptedException e) {
+				}
+			}
+		};
+	}
+	
+	
+	public static  void testTransferQueue() {
+		TransferQueue<Integer> transferQueue = new LinkedTransferQueue<Integer>();
+		
+		try {
+			transferQueue.put(1);
+		} catch(InterruptedException e) {}
+		try {
+			Integer t = (Integer) transferQueue.take();
+		} catch(InterruptedException e) {}
+		
+		Integer t = transferQueue.poll();
+		
+		//Integer t1 = transferQueue.transfer();
+		
+		boolean success = transferQueue.tryTransfer(t);
+		
+		try {
+			boolean success1 = transferQueue.tryTransfer(t, 5, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void testCompletionService() {
+		//Launch many Callables to the
+		// completion service.
+		//Results are queued as they arrive.
+		// To retrieve the results in sequence,
+		//call completionService.take().get();
+		
+		//Create a completionService, providing
+		// an Executor in the constructor.
+		final CompletionService completionService = new ExecutorCompletionService(Executors.newFixedThreadPool(4));
+		
+		//submit callables to the completion service
+		completionService.submit(new Callable<Integer>() {
+			@Override
+			public Integer call()  {
+				return 0;
+			}
+		});
+		
+		//now take results as they complete
+		Future future = null;
+		try {
+			future = completionService.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		try {
+			Object result = future.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public static void testConcurrentMap() {
 		//Construct empty concurrent map

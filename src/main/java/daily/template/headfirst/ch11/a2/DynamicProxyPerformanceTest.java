@@ -2,6 +2,7 @@ package daily.template.headfirst.ch11.a2;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.DecimalFormat;
@@ -76,13 +77,42 @@ public class DynamicProxyPerformanceTest {
 		System.out.println("Create ASM Proxy: " + time + " ms");
 		System.out.println("=========");
 		
-		for(int i=0;i<30;i++) {
+		CountService reflectProxy = new ReflectProxy(delegate);
+		for(int i=0;i<3;i++) {
+			test(reflectProxy, "Run reflectProxy Proxy: ");
 			test(jdkProxy, "Run JDK Proxy: ");
 			test(cglibProxy, "Run CGLIB Proxy: ");  
             test(javassistProxy, "Run JAVAASSIST Proxy: ");  
             test(javassistBytecodeProxy, "Run JAVAASSIST Bytecode Proxy: ");  
             test(asmBytecodeProxy, "Run ASM Bytecode Proxy: ");  
             System.out.println("----------------");  
+		}
+	}
+	private static class ReflectProxy implements CountService {
+		final Object delegate;
+		
+		ReflectProxy(Object delegate) {
+			this.delegate = delegate;
+		}
+		
+		static Method method;
+		
+		static {
+			try {
+				method = Class.forName("daily.template.headfirst.ch11.a2.CountService").getMethod("count");
+			} catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		@Override
+		public int count() {
+			
+			try {
+				return (int) method.invoke(delegate);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
+				e.printStackTrace();
+			}
+			return 0;
 		}
 	}
 	
@@ -113,7 +143,7 @@ public class DynamicProxyPerformanceTest {
 		}
 		
 		public Object invoke(Object object, Method method, Object[] objects) throws Throwable {
-			return method.invoke(object, objects);
+			return method.invoke(delegate, objects);
 		}
 	}
 	

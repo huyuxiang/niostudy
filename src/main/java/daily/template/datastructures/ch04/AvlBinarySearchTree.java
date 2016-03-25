@@ -1,9 +1,9 @@
 package daily.template.datastructures.ch04;
 
 //checked 20160314
-public class BinarySearchTree2<T extends Comparable<? super T>> {
+public class AvlBinarySearchTree<T extends Comparable<? super T>> {
 	
-	private static class AvlNode<T> {
+	public static class AvlNode<T> {
 		T element;			//the data in the node
 		AvlNode<T> left;	//left child
 		AvlNode<T> right;	//child
@@ -27,6 +27,15 @@ public class BinarySearchTree2<T extends Comparable<? super T>> {
 		return t==null?-1:t.height;
 	}
 	
+	public AvlNode<T> root;
+	
+	public AvlBinarySearchTree() {
+		root = null;
+	}
+	
+	public void insert(T x) {
+		root = insert(x, root);
+	}
 	/*
 	 * internal method to insert into a subtree.
 	 */
@@ -71,6 +80,15 @@ public class BinarySearchTree2<T extends Comparable<? super T>> {
 		return k1;
 	}
 	
+	private AvlNode<T> rotateWithRightChild(AvlNode<T> k2) {
+		AvlNode<T> k1 = k2.right;
+		k2.right = k1.left;
+		k1.left = k2;
+		k2.height = Math.max(height(k2.left), height(k2.right)) + 1;
+		k1.height = Math.max(height(k1.left), height(k1.right)) + 1;
+		return k1;
+	}
+	
 	/*
 	 * double rotate binary tree node: first left child
 	 * with its right child; then node k3 with new left child.
@@ -81,5 +99,11 @@ public class BinarySearchTree2<T extends Comparable<? super T>> {
 		k3.left = rotateWithRightChild(k3.left);
 		return rotateWithLeftChild(k3);
 	}
+	
+	private AvlNode<T> doubleWithRightChild(AvlNode<T> k3) {
+		k3.right = rotateWithLeftChild(k3.right);
+		return rotateWithRightChild(k3);
+	}
+
 	
 }

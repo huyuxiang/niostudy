@@ -244,7 +244,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		/*for(int i=0;i<100;i++) {
 			tree.insert(new Random().nextInt(99));
 		}*/
-		/*tree.insert(94);
+		tree.insert(94);
 		tree.insert(70);
 		tree.insert(39);
 		tree.insert(75);
@@ -253,13 +253,16 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		tree.insert(26);
 		tree.insert(115);
 		tree.insert(162);
-		tree.print();*/
-		for(int i=1;i<=5;i++) {
+		tree.insert(112);
+		tree.print();
+		tree.remove(100);
+		tree.print();
+		/*for(int i=1;i<=5;i++) {
 			tree.insert(i);
 			tree.print();
 			println();
 			System.out.println("---------------");
-		}
+		}*/
 	}
 
 }

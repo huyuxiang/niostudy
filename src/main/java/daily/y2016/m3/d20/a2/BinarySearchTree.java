@@ -2,6 +2,17 @@ package daily.y2016.m3.d20.a2;
 
 public class BinarySearchTree<T extends Comparable <? super T>> {
 	
+	public static void main(String args[]) {
+		BinarySearchTree<Integer> tree = new BinarySearchTree<Integer>();
+		tree.add(1);
+		tree.add(2);
+		tree.add(3);
+		tree.add(4);
+		tree.printTree();
+		System.out.println(tree.findMax());
+		tree.printTree();
+	}
+	
 	private static class BinaryNode<T> {
 		T element;
 		BinaryNode<T> left;
@@ -43,9 +54,9 @@ public class BinarySearchTree<T extends Comparable <? super T>> {
 		
 		int compareResult = node.element.compareTo(t);
 		if(compareResult>0) {
-			node.right = add(node.left, t);
+			node.left = add(node.left, t);
 		} else if(compareResult<0){
-			node.left = add(node.right, t);
+			node.right = add(node.right, t);
 		} else 
 			;
 		return node;

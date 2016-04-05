@@ -1,5 +1,9 @@
 package daily.template.datastructures.ch04;
 
+import java.util.NoSuchElementException;
+
+import daily.y2016.m4.d5.AvlBinarySearchTree.AvlNode;
+
 //checked 20160314
 public class AvlBinarySearchTree<T extends Comparable<? super T>> {
 	
@@ -103,6 +107,67 @@ public class AvlBinarySearchTree<T extends Comparable<? super T>> {
 	private AvlNode<T> doubleWithRightChild(AvlNode<T> k3) {
 		k3.right = rotateWithLeftChild(k3.right);
 		return rotateWithRightChild(k3);
+	}
+	
+	public void remove(T x) {
+		root = remove(root, x);
+	}
+	
+	private AvlNode<T> remove(AvlNode<T> node, T x) {
+		if(node==null) 
+			throw new NoSuchElementException();
+		
+		int compareResult = x.compareTo(node.element);
+		
+		if(compareResult > 0 ) {
+			node.right = remove(node.right, x);
+			node.height = Math.max(height(node.left), height(node.right)) + 1;
+			if(height(node.left) - height(node.right) == 2) {
+				if(height(node.left.left) > height(node.left.right)) {
+					node = rotateWithLeftChild(node);
+				} else {
+					doubleWithRightChild(node);
+				}
+			}
+		} else if(compareResult <0) {
+			node.left = remove(node.left, x);
+			node.height = Math.max(height(node.left), height(node.right)) + 1;
+			if(height(node.right) - height(node.left) == 2) {
+				// 判断 node.right.left 与 node.right.right 谁大
+				if(height(node.right.left) > height(node.right.right)) {
+					node = doubleWithRightChild(node);
+				} else {
+					node = rotateWithRightChild(node);
+				}
+			}
+		} else if(node.left!=null&& node.right!=null) {
+			node.element = findMin(node.right);
+			node.right = remove(node.right, node.element);
+			node.height = Math.max(height(node.left), height(node.right)) + 1;
+			if(height(node.left) - height(node.right) == 2) {
+				// 判断 node.right.left 与 node.right.right 谁大
+				if(height(node.left.right) > height(node.left.left)) {
+					node = doubleWithLeftChild(node);
+				} else {
+					node = rotateWithLeftChild(node);
+				}
+			}
+		} else {
+			node = node.left!=null?node.left: node.right;
+			// never happen 
+			//left.height - right height > 2
+		}
+		return node;
+	}
+	
+	private T findMin(AvlNode<T> node) {
+		if(node ==null) {
+			throw new NullPointerException();
+		}
+		while(node.left!=null) {
+			node = node.left;
+		}
+		return node.element;
 	}
 
 	

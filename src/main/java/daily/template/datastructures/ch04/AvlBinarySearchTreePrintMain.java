@@ -159,17 +159,17 @@ public class AvlBinarySearchTreePrintMain {
 		
 		//----- remove
 		
-		/*for(int i=1;i<10;i++) {
-			tree.remove(i);
-			print(tree);
-			println();
-			System.out.println("---------------");
-		}*/
-		for(int i=10;i<17;i++) {
+		for(int i=1;i<10;i++) {
 			tree.remove(i);
 			print(tree);
 			println();
 			System.out.println("---------------");
 		}/**/
+		/*for(int i=10;i<17;i++) {
+			tree.remove(i);
+			print(tree);
+			println();
+			System.out.println("---------------");
+		}*/
 	}
 }

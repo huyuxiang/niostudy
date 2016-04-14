@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://code.iqitoo.com/schema/dsf" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="http://code.iqitoo.com/schema/dsf">
+	<!-- 重要约定：所有属性名首字母必须小写，且区分大小写 -->
+	<xsd:element name="server" type="serverType">
+	</xsd:element>
+
+	<xsd:complexType name="serverType">
+		<xsd:attribute name="id" type="xsd:ID"></xsd:attribute>
+		<xsd:attribute name="iface" type="xsd:string"></xsd:attribute>
+		<xsd:attribute name="ref" type="xsd:IDREF"></xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:element name="registry" type="registryType">
+	</xsd:element>
+
+	<xsd:complexType name="registryType">
+		<xsd:attribute name="id" type="xsd:ID"></xsd:attribute>
+		<xsd:attribute name="name" type="xsd:string"></xsd:attribute>
+		<xsd:attribute name="url" type="xsd:string"></xsd:attribute>
+		<xsd:attribute name="username" type="xsd:string"></xsd:attribute>
+		<xsd:attribute name="password" type="xsd:string"></xsd:attribute>
+	</xsd:complexType>
+	
+	<xsd:element name="client" type="clientType">
+	</xsd:element>
+
+	<xsd:complexType name="clientType">
+		<xsd:attribute name="id" type="xsd:ID"></xsd:attribute>
+		<xsd:attribute name="iface" type="xsd:string"></xsd:attribute>
+	</xsd:complexType>
+
+</xsd:schema>

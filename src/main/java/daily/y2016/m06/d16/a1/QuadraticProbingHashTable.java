@@ -1,7 +1,7 @@
-package daily.template.datastructures.ch05;
+package daily.y2016.m06.d16.a1;
 
 public class QuadraticProbingHashTable<T> {
-	
+
 	private static class HashEntry<T> {
 		public T element;
 		public boolean isActive;
@@ -9,19 +9,19 @@ public class QuadraticProbingHashTable<T> {
 		public HashEntry(T e) {
 			this(e, true);
 		}
+		
 		public HashEntry(T e, boolean i) {
 			element = e;
 			isActive = i;
 		}
 	}
 	
-	private static final int DEFAULT_TABLE_SIZE = 11;
-	
+	private static final int DEFAULT_TALBE_SIZE = 11;
 	private HashEntry<T> [] array;
 	private int currentSize;
 	
 	public QuadraticProbingHashTable() {
-		this(DEFAULT_TABLE_SIZE);
+		this(DEFAULT_TALBE_SIZE);
 	}
 	
 	public QuadraticProbingHashTable(int size) {
@@ -31,7 +31,7 @@ public class QuadraticProbingHashTable<T> {
 	
 	public void makeEmpty() {
 		currentSize = 0;
-		for(int i=0;i<array.length;i++) 
+		for(int i=0;i<array.length;i++)
 			array[i] = null;
 	}
 	
@@ -48,42 +48,42 @@ public class QuadraticProbingHashTable<T> {
 		int offset = 1;
 		int currentPos = myhash(x);
 		
-		while(array[currentPos] !=null && !array[currentPos].element.equals(x)) {
+		while(array[currentPos]!=null&&!array[currentPos].element.equals(x)) {
 			currentPos = currentPos + offset;
 			offset = offset + 2;
-			if(currentPos >= array.length) 
+			if(currentPos >= array.length)
 				currentPos = currentPos - array.length;
 		}
 		return currentPos;
 	}
 	
 	private boolean isActive(int currentPos) {
-		return array[currentPos] !=null && array[currentPos].isActive;
+		return array[currentPos] !=null&& array[currentPos].isActive;
 	}
 	
-	public void insert( T x) {
+	public void insert(T x) {
 		int currentPos = findPos(x);
-		if(isActive(currentPos)) 
-			return ;
+		if(isActive(currentPos))
+			return;
 		
-		array[currentPos] = new HashEntry<T> (x, true);
+		array[currentPos] = new HashEntry<T>(x, true);
 		
-		if(++currentSize>array.length/2) 
+		if(++currentSize>array.length/2)
 			rehash();
 	}
 	
-	public void remvoe(T x) {
+	public void remove(T x) {
 		int currentPos = findPos(x);
-		if(isActive(currentPos)) 
+		if(isActive(currentPos))
 			array[currentPos].isActive = false;
 	}
 	
 	private void rehash() {
 		HashEntry<T> [] oldArray = array;
-		allocateArray(nextPrime(2 * oldArray.length)) ;
+		allocateArray(nextPrime(2 * oldArray.length));
 		currentSize = 0;
 		for(int i=0;i<oldArray.length;i++) {
-			if(oldArray[i] !=null&& oldArray[i].isActive)
+			if(oldArray[i]!=null&&oldArray[i].isActive)
 				insert(oldArray[i].element);
 		}
 	}
@@ -122,4 +122,5 @@ public class QuadraticProbingHashTable<T> {
 
         return true;
     }
+	
 }

@@ -1,9 +1,10 @@
-package daily.template.datastructures.ch06;
+package daily.y2016.m06.d17.a1;
 
 import daily.template.datastructures.ch04.UnderflowException;
 
 public class BinomialQueue<T extends Comparable<? super T>> {
 
+	
 	private static final int DEFAULT_TREES = 1;
 	
 	private int currentSize;
@@ -29,7 +30,7 @@ public class BinomialQueue<T extends Comparable<? super T>> {
 		return (1<<theTrees.length) -1;
 	}
 	
-	public BinomialQueue()  {
+	public BinomialQueue() {
 		theTrees = new BinNode[DEFAULT_TREES];
 		makeEmpty();
 	}
@@ -41,7 +42,7 @@ public class BinomialQueue<T extends Comparable<? super T>> {
 	}
 	
 	private BinNode<T> combineTrees(BinNode<T> t1, BinNode<T> t2) {
-		if(t1.element.compareTo(t2.element) > 0)
+		if(t1.element.compareTo(t2.element) >0)
 			return combineTrees(t2, t1);
 		t2.nextSibling = t1.leftChild;
 		t1.leftChild = t2;
@@ -53,57 +54,59 @@ public class BinomialQueue<T extends Comparable<? super T>> {
 		int oldNumTrees = theTrees.length;
 		
 		theTrees = new BinNode[newNumTrees];
-		for(int i=0;i<oldNumTrees; i++)
+		for(int i=0;i<oldNumTrees;i++)
 			theTrees[i] = old[i];
-		for(int i=oldNumTrees;i<newNumTrees; i++)
+		
+		for(int i=oldNumTrees;i<newNumTrees;i++)
 			theTrees[i] = null;
 	}
 	
 	public void merge(BinomialQueue<T> rhs) {
-		if(this==null)
+		if(this==null) 
 			return ;
 		
 		currentSize += rhs.currentSize;
 		
-		if(currentSize>capacity()) {
+		if(currentSize >capacity()) {
 			int newNumTrees = Math.max(theTrees.length, rhs.theTrees.length) + 1;
 			expandTheTrees(newNumTrees);
 		}
 		
 		BinNode<T> carry = null;
-		for(int i=0,j=1;j<=currentSize;i++, j*=2){
+		for(int i=0,j=1;j<=currentSize ;i++,j*=2) {
 			BinNode<T> t1 = theTrees[i];
-			BinNode<T> t2 = i<rhs.theTrees.length ? rhs.theTrees[i] : null;
+			BinNode<T> t2 = i<rhs.theTrees.length? rhs.theTrees[i] : null;
 			
-			int whichCase = t1 ==null ? 0 : 1;
-			whichCase += t2 == null ? 0 : 2;
-			whichCase += carry == null ? 0 : 4;
+			int whichCase = t1==null?0:1;
+			whichCase += t2 ==null ? 0 : 2;
+			whichCase += carry ==null? 0: 4;
 			
 			switch(whichCase) {
-			case 0: /*no trees */
-			case 1: /*Only this */
+			case 0:
+			case 1:
 				break;
-			case 2: /* Only rhs */
+			case 2:
 				theTrees[i] = t2;
-				rhs.theTrees[i] = null;
+				rhs.theTrees[i] =null;
 				break;
-			case 4: /* Only carry */
+			case 4:
 				theTrees[i] = carry;
 				carry = null;
 				break;
-			case 3: /* this and rhs */
+			case 3:
 				carry = combineTrees(t1, t2);
 				theTrees[i] = rhs.theTrees[i] = null;
 				break;
-			case 5: /* this and carry */
+			case 5:
 				carry = combineTrees(t1, carry);
 				theTrees[i] = null;
 				break;
-			case 6: /* rhs and carry */
+			case 6: 
 				carry = combineTrees(t2, carry);
 				rhs.theTrees[i] = null;
 				break;
-			case 7: /* all three */
+				
+			case 7:
 				theTrees[i] = carry;
 				carry = combineTrees(t1, t2);
 				rhs.theTrees[i] = null;
@@ -113,7 +116,6 @@ public class BinomialQueue<T extends Comparable<? super T>> {
 		
 		for(int k = 0;k<rhs.theTrees.length;k++) 
 			rhs.theTrees[k] = null;
-		
 		rhs.currentSize = 0;
 	}
 	
@@ -134,22 +136,19 @@ public class BinomialQueue<T extends Comparable<? super T>> {
 	private int findMinIndex() {
 		int i ;
 		int minIndex;
-		
-		for(i = 0;theTrees[i] == null;i++) 
+		for(i =0;theTrees[i]  == null;i++)
 			;
 		
-		for(minIndex = i;i<theTrees.length;i++) 
-			if(theTrees[i] !=null && 
-			theTrees[i].element.compareTo(theTrees[minIndex].element) <0)
+		for(minIndex = i;i<theTrees.length;i++)
+			if(theTrees[i] !=null
+			&& theTrees[i].element.compareTo(theTrees[minIndex].element) <0	)
 				minIndex = i;
-		
 		return minIndex;
 	}
 	
 	public T findMin() {
-		if(isEmpty()) 
+		if(isEmpty())
 			throw new UnderflowException();
-		
 		return theTrees[findMinIndex()].element;
 	}
 	
@@ -157,53 +156,30 @@ public class BinomialQueue<T extends Comparable<? super T>> {
 		if(isEmpty())
 			throw new UnderflowException();
 		
-		int minIndex = findMinIndex();
+		int minIndex= findMinIndex();
 		T minItem = theTrees[minIndex].element;
 		
 		BinNode<T> deletedTree = theTrees[minIndex].leftChild;
 		
-		//Construct H''
+		//construct h''
 		BinomialQueue<T> deletedQueue = new BinomialQueue<>();
 		deletedQueue.expandTheTrees(minIndex + 1);
 		
 		deletedQueue.currentSize = (1<<minIndex) -1;
 		
-		for( int j=minIndex -1;j>=0;j--) {
+		for(int j=minIndex -1 ;j>=0;j--) {
 			deletedQueue.theTrees[j] = deletedTree;
 			deletedTree = deletedTree.nextSibling;
 			deletedQueue.theTrees[j].nextSibling = null;
 		}
 		
-		//Construct H'
+		//construct h'
 		theTrees[minIndex] = null;
-		currentSize -= deletedQueue.currentSize +1;
+		currentSize -= deletedQueue.currentSize + 1;
 		
 		merge(deletedQueue);
 		
 		return minItem;
-	}
-	
-	//---
-	public static void main(String[] args) {
-		int numItems = 10000;
-        BinomialQueue<Integer> h  = new BinomialQueue<>( );
-        BinomialQueue<Integer> h1 = new BinomialQueue<>( );
-        int i = 37;
-
-        System.out.println( "Starting check." );
-
-        for( i = 37; i != 0; i = ( i + 37 ) % numItems )
-            if( i % 2 == 0 )
-                h1.insert( i );
-            else
-                h.insert( i );
-
-        h.merge( h1 );
-        for( i = 1; i < numItems; i++ )
-            if( h.deleteMin( ) != i )
-                System.out.println( "Oops! " + i );
- 
-        System.out.println( "Check done." );
 	}
 	
 }

@@ -10,7 +10,8 @@ import org.apache.avro.ipc.reflect.ReflectRequestor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.iqitoo.dsf.common.RpcException;
+import daily.template.rpc.dsf.common.RpcException;
+
 
 /**
  * 客户端Avro协议的Invoker

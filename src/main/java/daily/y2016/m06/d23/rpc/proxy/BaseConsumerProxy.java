@@ -1,70 +1,69 @@
-package daily.template.rpc.mayou.proxy;
+package daily.y2016.m06.d23.rpc.proxy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-
-import daily.template.rpc.mayou.client.ClientFactory;
-import daily.template.rpc.mayou.common.Parameters;
-import daily.template.rpc.mayou.common.Result;
-import daily.template.rpc.mayou.serialize.SerializeException;
-import daily.template.rpc.mayou.serialize.Serializer;
 
 import org.jboss.netty.channel.ChannelFuture;
 
-import daily.template.rpc.mayou.api.RpcFactory;
+import daily.y2016.m06.d23.rpc.api.RpcFactory;
+import daily.y2016.m06.d23.rpc.client.ClientFactory;
+import daily.y2016.m06.d23.rpc.common.Parameters;
+import daily.y2016.m06.d23.rpc.common.Result;
+import daily.y2016.m06.d23.rpc.serialize.SerializeException;
+import daily.y2016.m06.d23.rpc.serialize.Serializer;
 
-public abstract class BaseConsumerProxy {
+public class BaseConsumerProxy {
 
 	private ThreadLocal<ChannelFuture> channelFutureLocal;
-
+	
 	public BaseConsumerProxy(final String remoteAddress) {
 		channelFutureLocal = new ThreadLocal<ChannelFuture>() {
-
+			
 			@Override
 			protected ChannelFuture initialValue() {
-				return ClientFactory.getClient().getConnection(remoteAddress,
+				return ClientFactory.getClient().getConnection(remoteAddress, 
 						RpcFactory.DEFAULT_PORT);
 			}
 		};
 	}
-
-	protected Object doInterval(String interfactName, Object[] objs) {
+	
+	protected Object doInterval(String interfaceName, Object[] objs)  {
 		List<Class<?>> clazzs = new ArrayList<Class<?>>(objs.length);
 		List<Object> params = new ArrayList<Object>();
-		for (Object obj : objs) {
+		
+		for(Object obj: objs) {
 			clazzs.add(obj.getClass());
 			params.add(obj);
 		}
-
+		
 		Parameters parameters = new Parameters();
-		parameters.setInterfaceName(interfactName);
+		parameters.setInterfaceName(interfaceName);
 		parameters.setParameterTypes(clazzs);
 		parameters.setParameters(params);
-
-		while (!channelFutureLocal.get().getChannel().isConnected())
+		
+		while(!channelFutureLocal.get().getChannel().isConnected())
 			;
+		
 		try {
 			byte[] data = Serializer.serialize(parameters);
-
+			
 			channelFutureLocal.get().getChannel().write(data);
-			synchronized (channelFutureLocal.get().getChannel()) {
+			synchronized(channelFutureLocal.get().getChannel()) {
 				channelFutureLocal.get().getChannel().wait();
 			}
 			data = ClientFactory.getClient().getResult(
 					channelFutureLocal.get().getChannel());
-			Result result = Serializer.deserializer(data, Result.class);
-
-			if (!result.isSuccess()) {
-				System.out.println("出错啦");
+			Result result= Serializer.deserializer(data, Result.class);
+			
+			if(!result.isSuccess()) {
+				System.out.println("error");
 			}
-
+			
 			return result.getResult();
-		} catch (SerializeException e) {
+		} catch(SerializeException e) {
 			return null;
-		} catch (InterruptedException e) {
+		} catch(InterruptedException e) {
 			return null;
 		}
 	}
-
 }

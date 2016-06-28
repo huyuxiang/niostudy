@@ -38,13 +38,13 @@ public class Serializer {
 		return stream.toByteArray();
 	}
 	
-	public static <T> T deserializer(byte[] data, Class<T> clazz) throws SerializeException {
+	public static <T> T deserialize(byte[] data, Class<T> clazz) throws SerializeException {
 		if (data == null || data.length == 0) {
 			throw new SerializeException("数据为空");
 		}
 
-		InputStream stream = new BufferedInputStream(new ByteArrayInputStream(
-				data));
+		InputStream stream = new BufferedInputStream(
+				new ByteArrayInputStream(data));
 		Input input = new Input(stream);
 		return kryoThreadLocal.get().readObject(input, clazz);
 	}

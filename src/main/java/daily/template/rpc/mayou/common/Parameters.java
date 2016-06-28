@@ -14,7 +14,7 @@ public class Parameters {
 	
 	private List<?> parameters;
 
-	private Channel channel;
+	private transient Channel channel;
 	
 	public String getInterfaceName() {
 		return interfaceName;

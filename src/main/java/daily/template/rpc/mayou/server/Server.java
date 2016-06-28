@@ -70,7 +70,8 @@ public class Server {
 			isStart = true;
 
 			factory = new NioServerSocketChannelFactory(
-					Executors.newFixedThreadPool(2), Executors.newFixedThreadPool(9), 8);
+					Executors.newFixedThreadPool(2),
+					Executors.newFixedThreadPool(9), 8);
 			serverBootstrap = new ServerBootstrap(factory);
 			serverBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 
@@ -119,7 +120,7 @@ public class Server {
 			}
 
 			try {
-				Parameters parameters = Serializer.deserializer(entry.getColumn(), 
+				Parameters parameters = Serializer.deserialize(entry.getColumn(), 
 						Parameters.class);
 				Object result = methodSupport.invoke(
 						parameters.getInterfaceName(), 

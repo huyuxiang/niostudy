@@ -15,7 +15,6 @@ public class Encoder extends SimpleChannelDownstreamHandler {
 		byte[] data = (byte[])e.getMessage();
 		
 		ChannelBuffer buf = ChannelBuffers.buffer(data.length + 4);
-		System.out.println(data.length);
 		
 		buf.writeInt(data.length);
 		buf.writeBytes(data);

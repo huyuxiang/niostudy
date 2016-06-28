@@ -47,13 +47,13 @@ public abstract class BaseConsumerProxy {
 		try {
 			byte[] data = Serializer.serialize(parameters);
 
-			channelFutureLocal.get().getChannel().write(data);
 			synchronized (channelFutureLocal.get().getChannel()) {
+				channelFutureLocal.get().getChannel().write(data);
 				channelFutureLocal.get().getChannel().wait();
 			}
 			data = ClientFactory.getClient().getResult(
 					channelFutureLocal.get().getChannel());
-			Result result = Serializer.deserializer(data, Result.class);
+			Result result = Serializer.deserialize(data, Result.class);
 
 			if (!result.isSuccess()) {
 				System.out.println("出错啦");

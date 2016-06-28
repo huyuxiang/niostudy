@@ -2,7 +2,7 @@ package daily.template.rpc.mayou.example;
 
 import daily.template.rpc.mayou.proxy.ProxyFactory;
 
-public class Bootstrap {
+public class ClientBootstrapExample {
 
 	public static void main(String[] args) throws InterruptedException {
 		// System.out.println(testRpc.test());
@@ -15,7 +15,8 @@ public class Bootstrap {
 					TestRpc testRpc = (TestRpc) ProxyFactory
 							.getConsumerProxy(TestRpc.class, "127.0.0.1");
 					while (true) {
-						testRpc.test(data);
+						int i = testRpc.test(data);
+						System.out.println(i);
 					}
 				}
 				

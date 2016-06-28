@@ -1,4 +1,4 @@
-package daily.template.rpc.mayou.server;
+package daily.y2016.m06.d27.a1.rpc.server;
 
 import daily.template.rpc.mayou.example.TestRpcImpl;
 
@@ -9,5 +9,4 @@ public class ServerBootstrap {
 		server.register("daily.template.rpc.mayou.example.TestRpc", 
 				new TestRpcImpl());
 	}
-
 }

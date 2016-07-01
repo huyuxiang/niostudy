@@ -16,10 +16,10 @@ import daily.template.rpc.mayou.api.RpcFactory;
 
 public abstract class BaseConsumerProxy {
 
-	private ThreadLocal<ChannelFuture> channelFutureLocal;
+	private ThreadLocal<ChannelFuture> channelFutureThreadLocal;
 
 	public BaseConsumerProxy(final String remoteAddress) {
-		channelFutureLocal = new ThreadLocal<ChannelFuture>() {
+		channelFutureThreadLocal = new ThreadLocal<ChannelFuture>() {
 
 			@Override
 			protected ChannelFuture initialValue() {
@@ -42,17 +42,17 @@ public abstract class BaseConsumerProxy {
 		parameters.setParameterTypes(clazzs);
 		parameters.setParameters(params);
 
-		while (!channelFutureLocal.get().getChannel().isConnected())
+		while (!channelFutureThreadLocal.get().getChannel().isConnected())
 			;
 		try {
 			byte[] data = Serializer.serialize(parameters);
 
-			synchronized (channelFutureLocal.get().getChannel()) {
-				channelFutureLocal.get().getChannel().write(data);
-				channelFutureLocal.get().getChannel().wait();
+			synchronized (channelFutureThreadLocal.get().getChannel()) {
+				channelFutureThreadLocal.get().getChannel().write(data);
+				channelFutureThreadLocal.get().getChannel().wait();
 			}
 			data = ClientFactory.getClient().getResult(
-					channelFutureLocal.get().getChannel());
+					channelFutureThreadLocal.get().getChannel());
 			Result result = Serializer.deserialize(data, Result.class);
 
 			if (!result.isSuccess()) {

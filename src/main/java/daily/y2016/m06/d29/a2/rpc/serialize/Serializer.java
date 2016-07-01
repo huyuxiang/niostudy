@@ -1,4 +1,4 @@
-package daily.template.rpc.mayou.serialize;
+package daily.y2016.m06.d29.a2.rpc.serialize;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -13,44 +13,44 @@ public class Serializer {
 
 	private static ThreadLocal<Kryo> kryoThreadLocal;
 	
-	static{
-		kryoThreadLocal = new ThreadLocal<Kryo>(){
+	static {
+		kryoThreadLocal = new ThreadLocal<Kryo>() {
 			
-			@Override
-			public Kryo initialValue(){
+			@Override 
+			public Kryo initialValue() {
 				return new Kryo();
 			}
-			
 		};
 	}
 	
 	public static byte[] serialize(Object object) throws SerializeException {
-		if (object == null) {
-			throw new SerializeException("指向object对象指针为空");
+		if(object ==null) {
+			throw new SerializeException("object is null");
 		}
-
+		
 		Kryo kryo = kryoThreadLocal.get();
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(2000);
 		Output output = new Output(stream);
 		kryo.writeObject(output, object);
 		output.close();
-
+		
 		return stream.toByteArray();
+		
 	}
 	
-	public static <T> T deserialize(byte[] data, Class<T> clazz) throws SerializeException {
-		if (data == null || data.length == 0) {
-			throw new SerializeException("数据为空");
+	public static <T> T deserialize(byte[] data, Class<T> clazz)throws SerializeException{
+		
+		if(data==null ||data.length==0) {
+			throw new SerializeException("data is null");
 		}
-
-		Kryo kryo = kryoThreadLocal.get();
-		InputStream stream = new BufferedInputStream(
-				new ByteArrayInputStream(data));
+		
+		InputStream stream = new BufferedInputStream(new ByteArrayInputStream(data));
 		Input input = new Input(stream);
+		Kryo kryo = kryoThreadLocal.get();
 		T object = kryo.readObject(input, clazz);
 		input.close();
 		
 		return object;
 	}
-
+	
 }

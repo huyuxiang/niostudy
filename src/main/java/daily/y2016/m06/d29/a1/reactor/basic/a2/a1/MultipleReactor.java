@@ -1,4 +1,4 @@
-package daily.template.reactor.ReactorPool;
+package daily.y2016.m06.d29.a1.reactor.basic.a2.a1;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,16 +9,12 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-//Basic Reactor Design
-//Single threaded version
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
-//reactor 1: setup
 public class MultipleReactor implements Runnable {
-	
-	public static void main(String args[] ) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		MultipleReactor server = new MultipleReactor(8000);
 		new Thread(server).start();
 	}
@@ -42,7 +38,7 @@ public class MultipleReactor implements Runnable {
 		for(int i=0;i<DEFAULT_WORKER_SIZE;i++) {
 			final Selector selector = Selector.open();
 			selectors[i] = selector;
-			workerpool.execute(new Runnable () {
+			workerpool.execute(new Runnable() {
 				@Override
 				public void run() {
 					try {
@@ -50,11 +46,12 @@ public class MultipleReactor implements Runnable {
 							selector.select(500);
 							Set selectedSet = selector.selectedKeys();
 							Iterator it = selectedSet.iterator();
-							while(it.hasNext()) 
+							while(it.hasNext())
 								dispatch((SelectionKey)(it.next()));
 							selectedSet.clear();
 						}
-					} catch(IOException ex) {
+					} catch(IOException e) {
+						
 					}
 				}
 			});
@@ -62,61 +59,60 @@ public class MultipleReactor implements Runnable {
 		
 	}
 	
-//reactor 2: dispatch loop
-	public void run() { //normally in a new Thread
+	public void run() {
 		try {
 			while(!Thread.interrupted()) {
 				selector.select(500);
 				Set selectedSet = selector.selectedKeys();
 				Iterator it = selectedSet.iterator();
-				while(it.hasNext()) 
+				while(it.hasNext())
 					dispatch((SelectionKey)(it.next()));
 				selectedSet.clear();
 			}
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
 	
 	void dispatch(SelectionKey k) {
-		Runnable r = (Runnable) (k.attachment());
-		if(r!=null) 
+		Runnable r  = (Runnable) (k.attachment());
+		if(r!=null)
 			r.run();
 	}
 	
-	
-//reactor 3: acceptor
-	class Acceptor implements Runnable {//inner
+	class Acceptor implements Runnable {
 		public synchronized void run() {
-			SocketChannel connection=null;
+			SocketChannel connection = null;
 			try {
 				connection = serverSocket.accept();
-			} catch (IOException e1) {
+			} catch(IOException e) {
+				
 			}
-			if(connection !=null)
+			if(connection!=null)
 				try {
 					new Handler(selectors[next], connection);
-				} catch (IOException e) {
+				} catch(IOException e) {
+					
 				}
-			if(++next==selectors.length) next= 0;
+			if(++next==selectors.length) next = 0;
 		}
 	}
 }
+
 class Handler implements Runnable {
-	
 	int MAXIN = 1024;
 	int MAXOUT = 1024;
+	
 	final SocketChannel socket;
 	final SelectionKey sk;
 	ByteBuffer input = ByteBuffer.allocate(MAXIN);
 	ByteBuffer output = ByteBuffer.allocate(MAXOUT);
-	static final int READING = 0, SENDING = 1;
+	static final int READING =0 , SENDING = 1;
 	int state = READING;
 	
-	Handler(Selector sel, SocketChannel c) throws IOException {
+	Handler(Selector sel , SocketChannel c) throws IOException {
 		socket = c;
 		c.configureBlocking(false);
-		//Optionally try first read now
 		sk = socket.register(sel, 0);
 		sk.attach(this);
 		sk.interestOps(SelectionKey.OP_READ);
@@ -125,11 +121,12 @@ class Handler implements Runnable {
 	
 	public void run() {
 		try {
-			if(state == READING) 
+			if(state==READING)
 				read();
-			else if(state == SENDING) 
+			else if(state==SENDING)
 				send();
-		} catch(IOException ex) {
+			
+		} catch(IOException e) {
 			
 		}
 	}
@@ -137,15 +134,14 @@ class Handler implements Runnable {
 	void send() throws IOException {
 		output = output.put("send()".getBytes());
 		socket.write(output);
-		if(outputIsComplete()) 
+		if(outputIsComplete())
 			sk.cancel();
 	}
 	
-	//uses util.concurrent thread pool
 	static ExecutorService pool = Executors.newFixedThreadPool(10);
 	static final int PROCESSING = 3;
 	
-	synchronized void read() throws IOException {
+	synchronized void read() throws IOException{
 		socket.read(input);
 		byte[] requestBytes = new byte[1024];
 		input.flip();
@@ -159,7 +155,7 @@ class Handler implements Runnable {
 	
 	synchronized void processAndHandOff() {
 		process();
-		state = SENDING;//or rebind attachment
+		state = SENDING;
 		sk.interestOps(SelectionKey.OP_WRITE);
 	}
 	
@@ -170,17 +166,14 @@ class Handler implements Runnable {
 	}
 	
 	boolean inputIsComplete() {
-		System.out.println("inputIsComplete()");
 		return true;
 	}
 	
 	boolean outputIsComplete() {
-		System.out.println("outputIsComplete()");
 		return true;
 	}
 	
 	void process() {
-		System.out.println("process()");
+		
 	}
-	
 }

@@ -1,4 +1,4 @@
-package daily.template.reactor.Basic;
+package daily.y2016.m06.d29.a1.reactor.basic.a1;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,13 +9,10 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-//Basic Reactor Design
-//Single threaded version
 
-//reactor 1: setup
 public class Reactor implements Runnable {
-	
-	public static void main(String args[] ) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		Reactor server = new Reactor(8000);
 		new Thread(server).start();
 	}
@@ -32,15 +29,7 @@ public class Reactor implements Runnable {
 		sk.attach(new Acceptor());
 	}
 	
-	/*
-	 Alternatively, use explicit SPI provider:
-	 	SelectorProvider p = SelectorProvider.provider();
-	 	selector = p.openSelector();
-	 	serverSocket = p.openServerSocketChannel();
-	 */
-	
-//reactor 2: dispatch loop
-	public void run() { //normally in a new Thread
+	public void run() {
 		try {
 			while(!Thread.interrupted()) {
 				selector.select();
@@ -50,30 +39,31 @@ public class Reactor implements Runnable {
 					dispatch((SelectionKey)(it.next()));
 				selectedSet.clear();
 			}
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
 	
-	void dispatch(SelectionKey k) {
-		Runnable r = (Runnable) (k.attachment());
+	void dispatch(SelectionKey key) {
+		Runnable r = (Runnable) key.attachment();
 		if(r!=null) 
 			r.run();
 	}
-//reactor 3: acceptor
-	class Acceptor implements Runnable {//inner
+	
+	class Acceptor implements Runnable {
 		public void run() {
-			try {
+			try{
 				SocketChannel c = serverSocket.accept();
-				if(c !=null) 
+				if(c!=null)
 					new Handler(selector, c);
-			} catch(IOException ex) {
+			}  catch(IOException e) {
 				
 			}
 		}
 	}
 }
-//Reactor 4: Handler setup
+
+
 final class Handler implements Runnable {
 	int MAXIN = 1024;
 	int MAXOUT = 1024;
@@ -84,24 +74,23 @@ final class Handler implements Runnable {
 	static final int READING = 0, SENDING = 1;
 	int state = READING;
 	
-	Handler(Selector sel, SocketChannel c) throws IOException {
-		socket = c;
-		c.configureBlocking(false);
-		//Optionally try first read now
-		sk = socket.register(sel, 0);
+	Handler(Selector selector, SocketChannel socket) throws IOException {
+		this.socket = socket;
+		socket.configureBlocking(false);
+		
+		sk = socket.register(selector, 0);
 		sk.attach(this);
 		sk.interestOps(SelectionKey.OP_READ);
-		sel.wakeup();
+		selector.wakeup();
 	}
 	
-	//Reactor 5: Request handling
 	public void run() {
 		try {
-			if(state == READING) 
+			if(state ==READING)
 				read();
-			else if(state == SENDING) 
+			else if(state ==SENDING)
 				send();
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
@@ -119,14 +108,12 @@ final class Handler implements Runnable {
 	void process() {
 		System.out.println("process()");
 	}
-
 	
 	void read() throws IOException {
 		socket.read(input);
 		if(inputIsComplete()) {
 			process();
 			state = SENDING;
-			//Normally alse do first write now
 			sk.interestOps(SelectionKey.OP_WRITE);
 		}
 	}
@@ -137,27 +124,3 @@ final class Handler implements Runnable {
 			sk.cancel();
 	}
 }
-
-/*
- A simple use of GoF State-Object pattern
-  Rebind appropriate handler as attachment
-  
-   class Handler {
-   	public void run() {
-   	 socket.read(input);
-   	 if(inputIsComplete()) {
-   	  process();
-   	  sk.attach(new Sender());
-   	  sk.interest(SelectionKey.OP_WRITE);
-   	  sk.selector().wakeup();
-   	 }
-   	}
-   	
-   	class Sender impelements Runnable {
-   	 public void run() {
-   	  socket.write(output);
-   	  if(outputIsComplete()) sk.cancel();
-   	 }
-   	}
-   }
- */

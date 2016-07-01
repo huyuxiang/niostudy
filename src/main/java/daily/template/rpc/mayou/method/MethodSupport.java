@@ -8,9 +8,22 @@ import net.sf.cglib.reflect.FastClass;
 
 public class MethodSupport {
 
+	private static class FastClassWrapper {
+
+		public final FastClass fastClass;
+
+		public final Object obj;
+
+		public FastClassWrapper(FastClass fastClass, Object obj) {
+			this.fastClass = fastClass;
+			this.obj = obj;
+		}
+
+	}
+	
 	private final ConcurrentMap<String, FastClassWrapper> fastClassMap = 
 			new ConcurrentHashMap<String, FastClassWrapper>();
-
+	
 	public Object invoke(String methodName, Class<?>[] types,
 			Object[] parameters) throws InvocationTargetException,
 			MethodUnRegisterException {
@@ -30,17 +43,5 @@ public class MethodSupport {
 		fastClassMap.putIfAbsent(className, wrapper);
 	}
 
-	private static class FastClassWrapper {
-
-		public final FastClass fastClass;
-
-		public final Object obj;
-
-		public FastClassWrapper(FastClass fastClass, Object obj) {
-			this.fastClass = fastClass;
-			this.obj = obj;
-		}
-
-	}
 
 }

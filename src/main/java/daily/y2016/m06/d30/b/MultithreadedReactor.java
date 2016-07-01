@@ -1,4 +1,4 @@
-package daily.template.reactor.Multithreaded;
+package daily.y2016.m06.d30.b;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,13 +12,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import daily.template.reactor.ReactorPool.MultipleReactor;
-
-
-//reactor 1: setup
 public class MultithreadedReactor implements Runnable {
-	
-	public static void main(String args[] ) throws IOException {
+
+	public static void main(String[] args) throws IOException {
 		MultithreadedReactor server = new MultithreadedReactor(8000);
 		new Thread(server).start();
 	}
@@ -35,25 +31,17 @@ public class MultithreadedReactor implements Runnable {
 		sk.attach(new Acceptor());
 	}
 	
-	/*
-	 Alternatively, use explicit SPI provider:
-	 	SelectorProvider p = SelectorProvider.provider();
-	 	selector = p.openSelector();
-	 	serverSocket = p.openServerSocketChannel();
-	 */
-	
-//reactor 2: dispatch loop
-	public void run() { //normally in a new Thread
+	public void run() {
 		try {
 			while(!Thread.interrupted()) {
 				selector.select();
 				Set selectedSet = selector.selectedKeys();
 				Iterator it = selectedSet.iterator();
-				while(it.hasNext()) 
+				while(it.hasNext())
 					dispatch((SelectionKey)(it.next()));
 				selectedSet.clear();
 			}
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
@@ -63,66 +51,66 @@ public class MultithreadedReactor implements Runnable {
 		if(r!=null) 
 			r.run();
 	}
-//reactor 3: acceptor
-	class Acceptor implements Runnable {//inner
+	
+	class Acceptor implements Runnable {
 		public void run() {
 			try {
 				SocketChannel c = serverSocketChannel.accept();
-				if(c !=null) 
+				if(c!=null)
 					new Handler(selector, c);
-			} catch(IOException ex) {
+			} catch(IOException e){
 				
 			}
 		}
 	}
 }
 
+
 class Handler implements Runnable {
 	
 	int MAXIN = 1024;
 	int MAXOUT = 1024;
-	final SocketChannel socket;
-	final SelectionKey sk;
+	final SocketChannel socketChannel;
+	final SelectionKey selectionKey;
 	ByteBuffer input = ByteBuffer.allocate(MAXIN);
 	ByteBuffer output = ByteBuffer.allocate(MAXOUT);
 	static final int READING = 0, SENDING = 1;
 	int state = READING;
 	Selector selector;
 	
-	Handler(Selector sel, SocketChannel c) throws IOException {
-		socket = c;
-		selector = sel;
-		c.configureBlocking(false);
-		//Optionally try first read now
-		sk = socket.register(sel, 0);
-		sk.attach(this);
-		sk.interestOps(SelectionKey.OP_READ);
-		sel.wakeup();
+	Handler(Selector selector, SocketChannel socketChannel) throws IOException {
+		this.socketChannel = socketChannel;
+		this.selector = selector;
+		socketChannel.configureBlocking(false);
+		selectionKey = socketChannel.register(selector, 0);
+		selectionKey.attach(this);
+		selectionKey.interestOps(SelectionKey.OP_READ);
+		selector.wakeup();
 	}
 	
 	public void run() {
 		try {
-			if(state == READING) 
+			if(state ==READING) 
 				read();
-			else if(state == SENDING) 
+			else if(state ==SENDING)
 				send();
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
 	
 	void send() throws IOException {
-		socket.write(output);
-		if(outputIsComplete()) 
-			sk.cancel();
+		socketChannel.write(output);
+		if(outputIsComplete())
+			selectionKey.cancel();
 	}
 	
-	//uses util.concurrent thread pool
+	
 	static ExecutorService pool = Executors.newFixedThreadPool(10);
 	static final int PROCESSING = 3;
 	
 	synchronized void read() throws IOException {
-		socket.read(input);
+		socketChannel.read(input);
 		if(inputIsComplete()) {
 			state = PROCESSING;
 			pool.execute(new Processer());
@@ -131,8 +119,8 @@ class Handler implements Runnable {
 	
 	synchronized void processAndHandOff() {
 		process();
-		state = SENDING;//or rebind attachment
-		sk.interestOps(SelectionKey.OP_WRITE);
+		state = SENDING;
+		selectionKey.interestOps(SelectionKey.OP_WRITE);
 		selector.wakeup();
 	}
 	

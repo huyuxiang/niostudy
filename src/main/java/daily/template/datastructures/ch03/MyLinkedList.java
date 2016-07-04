@@ -2,11 +2,6 @@ package daily.template.datastructures.ch03;
 
 public class MyLinkedList<T> implements Iterable<T> {
 	
-	private int theSize;
-	private int modCount = 0;
-	private Node<T> beginMarker;
-	private Node<T> endMarker;
-	
 	private static class Node<T> {
 		public T data;
 		public Node<T> prev;
@@ -22,6 +17,11 @@ public class MyLinkedList<T> implements Iterable<T> {
 	public MyLinkedList() {
 		clear();
 	}
+	
+	private int theSize;
+	private int modCount = 0;
+	private Node<T> beginMarker;
+	private Node<T> endMarker;
 	
 	public void clear() {
 		beginMarker = new Node<T>(null, null, null);

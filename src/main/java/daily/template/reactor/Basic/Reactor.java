@@ -16,20 +16,20 @@ import java.util.Set;
 public class Reactor implements Runnable {
 	
 	public static void main(String args[] ) throws IOException {
-		Reactor server = new Reactor(8000);
-		new Thread(server).start();
+		Reactor reactor = new Reactor(8000);
+		new Thread(reactor).start();
 	}
 	
 	final Selector selector;
-	final ServerSocketChannel serverSocket;
+	final ServerSocketChannel serverSocketChannel;
 	
 	Reactor(int port) throws IOException {
 		selector = Selector.open();
-		serverSocket = ServerSocketChannel.open();
-		serverSocket.socket().bind(new InetSocketAddress(port));
-		serverSocket.configureBlocking(false);
-		SelectionKey sk = serverSocket.register(selector, SelectionKey.OP_ACCEPT);
-		sk.attach(new Acceptor());
+		serverSocketChannel = ServerSocketChannel.open();
+		serverSocketChannel.socket().bind(new InetSocketAddress(port));
+		serverSocketChannel.configureBlocking(false);
+		SelectionKey selectionKey = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+		selectionKey.attach(new Acceptor());
 	}
 	
 	/*
@@ -44,19 +44,19 @@ public class Reactor implements Runnable {
 		try {
 			while(!Thread.interrupted()) {
 				selector.select();
-				Set selectedSet = selector.selectedKeys();
-				Iterator it = selectedSet.iterator();
+				Set set = selector.selectedKeys();
+				Iterator it = set.iterator();
 				while(it.hasNext()) 
 					dispatch((SelectionKey)(it.next()));
-				selectedSet.clear();
+				set.clear();
 			}
 		} catch(IOException ex) {
 			
 		}
 	}
 	
-	void dispatch(SelectionKey k) {
-		Runnable r = (Runnable) (k.attachment());
+	void dispatch(SelectionKey selectionKey) {
+		Runnable r = (Runnable) (selectionKey.attachment());
 		if(r!=null) 
 			r.run();
 	}
@@ -64,9 +64,9 @@ public class Reactor implements Runnable {
 	class Acceptor implements Runnable {//inner
 		public void run() {
 			try {
-				SocketChannel c = serverSocket.accept();
-				if(c !=null) 
-					new Handler(selector, c);
+				SocketChannel socketChannel = serverSocketChannel.accept();
+				if(socketChannel !=null) 
+					new Handler(selector, socketChannel);
 			} catch(IOException ex) {
 				
 			}
@@ -77,20 +77,20 @@ public class Reactor implements Runnable {
 final class Handler implements Runnable {
 	int MAXIN = 1024;
 	int MAXOUT = 1024;
-	final SocketChannel socket;
-	final SelectionKey sk;
+	final SocketChannel socketChannel;
+	final SelectionKey selectionKey;
 	ByteBuffer input = ByteBuffer.allocate(MAXIN);
 	ByteBuffer output = ByteBuffer.allocate(MAXOUT);
 	static final int READING = 0, SENDING = 1;
 	int state = READING;
 	
-	Handler(Selector sel, SocketChannel c) throws IOException {
-		socket = c;
-		c.configureBlocking(false);
+	Handler(Selector sel, SocketChannel sc) throws IOException {
+		socketChannel = sc;
+		socketChannel.configureBlocking(false);
 		//Optionally try first read now
-		sk = socket.register(sel, 0);
-		sk.attach(this);
-		sk.interestOps(SelectionKey.OP_READ);
+		selectionKey = socketChannel.register(sel, 0);
+		selectionKey.attach(this);
+		selectionKey.interestOps(SelectionKey.OP_READ);
 		sel.wakeup();
 	}
 	
@@ -122,19 +122,19 @@ final class Handler implements Runnable {
 
 	
 	void read() throws IOException {
-		socket.read(input);
+		socketChannel.read(input);
 		if(inputIsComplete()) {
 			process();
 			state = SENDING;
 			//Normally alse do first write now
-			sk.interestOps(SelectionKey.OP_WRITE);
+			selectionKey.interestOps(SelectionKey.OP_WRITE);
 		}
 	}
 	
 	void send() throws IOException {
-		socket.write(output);
+		socketChannel.write(output);
 		if(outputIsComplete()) 
-			sk.cancel();
+			selectionKey.cancel();
 	}
 }
 

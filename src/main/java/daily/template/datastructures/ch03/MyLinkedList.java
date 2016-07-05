@@ -38,11 +38,9 @@ public class MyLinkedList<T> implements Iterable<T> {
 		return size() == 0;
 	}
 	
-	
-	
 	private Node<T> getNode(int idx) {
 		Node<T> p;
-		if(idx<0||idx>size()) 
+		if(idx<0||idx>=size()) 
 			throw new IndexOutOfBoundsException();
 		
 		if(idx<size()/2) {
@@ -61,6 +59,15 @@ public class MyLinkedList<T> implements Iterable<T> {
 		add(size(), x);
 		return true;
 	}
+	
+	private void addBefore(Node<T> p, T x) {
+		Node<T> newNode = new Node<T>(x, p.prev, p);
+		newNode.prev.next = newNode;
+		p.prev = newNode;
+		theSize++;
+		modCount++;
+	}
+	
 	public void add(int idx, T x) {
 		addBefore(getNode(idx), x);
 	}
@@ -77,13 +84,7 @@ public class MyLinkedList<T> implements Iterable<T> {
 		return remove(getNode(idx));
 	}
 	
-	private void addBefore(Node<T> p, T x) {
-		Node<T> newNode = new Node<T>(x, p.prev, p);
-		newNode.prev.next = newNode;
-		p.prev = newNode;
-		theSize++;
-		modCount++;
-	}
+	
 	private T remove(Node<T> p) {
 		p.next.prev = p.prev;
 		p.prev.next = p.next;

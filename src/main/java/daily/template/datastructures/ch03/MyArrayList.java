@@ -10,6 +10,14 @@ public class MyArrayList<T> implements Iterable<T> {
 	public MyArrayList() {
 		clear();
 	}
+	public void ensureCapacity(int newCapacity) {
+		if(newCapacity < theSize) 
+			return ;
+		T[] old = theItems;
+		theItems = (T[]) new Object[newCapacity];
+		for(int i=0;i<size();i++) 
+			theItems[i] = old[i];
+	}
 	
 	public void clear() {
 		theSize = 0;
@@ -38,15 +46,6 @@ public class MyArrayList<T> implements Iterable<T> {
 		T old = theItems[idx];
 		theItems[idx] = newVal;
 		return old;
-	}
-	
-	public void ensureCapacity(int newCapacity) {
-		if(newCapacity < theSize) 
-			return ;
-		T[] old = theItems;
-		theItems = (T[]) new Object[newCapacity];
-		for(int i=0;i<size();i++) 
-			theItems[i] = old[i];
 	}
 	
 	public boolean add (T x) {

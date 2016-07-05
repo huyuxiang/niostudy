@@ -1,7 +1,7 @@
-package daily.template.datastructures.ch03;
+package daily.y2016.m07.d02.a;
 
-public class MyLinkedList<T> implements Iterable<T> {
-	
+public class MyLinkedList<T> implements Iterable<T>{
+
 	private int theSize;
 	private int modCount = 0;
 	private Node<T> beginMarker;
@@ -35,27 +35,30 @@ public class MyLinkedList<T> implements Iterable<T> {
 		return theSize;
 	}
 	public boolean isEmpty() {
-		return size() == 0;
+		return size()==0;
 	}
-	
-	
 	
 	private Node<T> getNode(int idx) {
 		Node<T> p;
-		if(idx<0||idx>size()) 
+		if(idx<0||idx>size())
 			throw new IndexOutOfBoundsException();
 		
 		if(idx<size()/2) {
 			p = beginMarker.next;
-			for(int i=0;i<idx;i++) 
+			for(int i=0;i<idx;i++){
 				p = p.next;
+			}
 		} else {
 			p = endMarker;
-			for(int i=size();i>idx;i--) 
+			for(int i=size();i>idx;i--)
 				p = p.prev;
 		}
 		
 		return p;
+	}
+	public boolean add(T x) {
+		add(size(), x);
+		return true;
 	}
 	
 	private void addBefore(Node<T> p, T x) {
@@ -64,11 +67,6 @@ public class MyLinkedList<T> implements Iterable<T> {
 		p.prev = newNode;
 		theSize++;
 		modCount++;
-	}
-	
-	public boolean add(T x) {
-		add(size(), x);
-		return true;
 	}
 	
 	public void add(int idx, T x) {
@@ -83,6 +81,9 @@ public class MyLinkedList<T> implements Iterable<T> {
 		p.data = newVal;
 		return oldVal;
 	}
+	public T remove(int idx) {
+		return remove(getNode(idx));
+	}
 	
 	private T remove(Node<T> p) {
 		p.next.prev = p.prev;
@@ -92,11 +93,6 @@ public class MyLinkedList<T> implements Iterable<T> {
 		
 		return p.data;
 	}
-	
-	public T remove(int idx) {
-		return remove(getNode(idx));
-	}
-	
 	
 	public java.util.Iterator<T> iterator() {
 		return new LinkedListIterator();
@@ -112,9 +108,9 @@ public class MyLinkedList<T> implements Iterable<T> {
 		}
 		
 		public T next() {
-			if(modCount!=expectedModCount) 
-				throw new java.util.ConcurrentModificationException();
-			if(!hasNext()) 
+			if(modCount != expectedModCount) 
+				throw new java.util.ConcurrentModificationException ();
+			if(!hasNext())
 				throw new java.util.NoSuchElementException();
 			
 			T nextItem = current.data;
@@ -124,8 +120,9 @@ public class MyLinkedList<T> implements Iterable<T> {
 		}
 		
 		public void remove() {
-			if(modCount!=expectedModCount) 
+			if(modCount != expectedModCount) 
 				throw new java.util.ConcurrentModificationException();
+			
 			if(!okToRemove) 
 				throw new IllegalStateException();
 			
@@ -134,4 +131,5 @@ public class MyLinkedList<T> implements Iterable<T> {
 			expectedModCount++;
 		}
 	}
+	
 }

@@ -2,7 +2,7 @@ package daily.template.datastructures.ch03;
 
 import java.util.Random;
 
-public class MyQueue<T> {
+public class MyArrayQueue<T> {
 
 	
 	
@@ -16,7 +16,7 @@ public class MyQueue<T> {
 	private QueueNode[] items;
 	private int size;
 	
-	public MyQueue() {
+	public MyArrayQueue() {
 		this(DEFAULT_SIZE);
 	}
 	
@@ -32,7 +32,7 @@ public class MyQueue<T> {
 		public T element;
 	}
 	
-	public MyQueue(int size) {
+	public MyArrayQueue(int size) {
 		items = new QueueNode[size];
 		size = 0;
 	}
@@ -109,7 +109,7 @@ public class MyQueue<T> {
 	}
 	
 	public static void main(String[] args) {
-		MyQueue<Integer> myQueue = new MyQueue(SIZE_129);
+		MyArrayQueue<Integer> myQueue = new MyArrayQueue(SIZE_129);
 		for(int i=0;i<100;i++) {
 			myQueue.offer(new Random().nextInt(100));
 		}

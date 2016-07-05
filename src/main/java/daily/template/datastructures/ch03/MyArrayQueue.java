@@ -3,15 +3,8 @@ package daily.template.datastructures.ch03;
 import java.util.Random;
 
 public class MyArrayQueue<T> {
-
-	
 	
 	public static final int DEFAULT_SIZE = 10;
-	public static final int SIZE_65 = 65;
-	public static final int SIZE_129 = 129;
-	public static final int SIZE_257 = 257;
-	
-	public static final QueueNode NULL = new QueueNode();
 	
 	private QueueNode[] items;
 	private int size;
@@ -36,6 +29,28 @@ public class MyArrayQueue<T> {
 		items = new QueueNode[size];
 		size = 0;
 	}
+	public boolean offer(T t) {
+		if(size>=items.length) 
+			return false;//添加失败 offer返回 false  addthrow IllegalStateException
+		
+		QueueNode qnode = new QueueNode(t);
+		items[size++] = qnode;
+		
+		return true;
+	}
+	
+	public QueueNode poll() {
+		if(size<=0) 
+			return null;
+		
+		QueueNode head = items[0];
+		
+		for(int i=0;i<size-1;i++) 
+			items[i] = items[i+1];
+		
+		size--;
+		return head;
+	}
 	
 	/*     抛出异常 返回特殊值 
 	 插入 add(e) offer(e) 
@@ -55,40 +70,20 @@ public class MyArrayQueue<T> {
 		
 		return true;
 	}*/
-	public boolean offer(T t) {
-		if(size>=items.length) {
-			return false;//添加失败 offer返回 false  addthrow IllegalStateException
-		}
-		
-		QueueNode qnode = new QueueNode(t);
-		items[size++] = qnode;
-		
-		return true;
-	}
+	public static final QueueNode NULL = new QueueNode();
 	
+	
+	public static final int SIZE_65 = 65;
+	public static final int SIZE_129 = 129;
+	public static final int SIZE_257 = 257;
 	public boolean offerSeperator() {
-		if(size>=items.length) {
+		if(size>=items.length) 
 			return false;//添加失败 offer返回 false  addthrow IllegalStateException
-		}
+		
 		
 		items[size++] = NULL;
 		
 		return true;
-	}
-	
-	public QueueNode poll() {
-		if(size<=0) {
-			return null;
-		}
-		
-		QueueNode head = items[0];
-		
-		for(int i=0;i<size-1;i++) {
-			items[i] = items[i+1];
-		}
-		
-		size--;
-		return head;
 	}
 	
 	public void print() {

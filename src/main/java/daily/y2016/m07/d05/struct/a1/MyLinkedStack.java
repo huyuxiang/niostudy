@@ -1,4 +1,4 @@
-package daily.template.datastructures.ch03;
+package daily.y2016.m07.d05.struct.a1;
 
 public class MyLinkedStack<T> {
 
@@ -29,7 +29,7 @@ public class MyLinkedStack<T> {
 	}
 	
 	public T top() {
-		if(isEmpty()) 
+		if(isEmpty())
 			throw new RuntimeException("stack is empty");
 		return top.data;
 	}
@@ -50,38 +50,4 @@ public class MyLinkedStack<T> {
 		return true;
 	}
 	
-	public void print() {
-		
-		for(Node current = top; current!=null;current = current.next) {
-			System.out.println(current.data);
-		}
-	}
-	
-	public static void main(String args[]) {
-		MyLinkedStack stack = new MyLinkedStack();
-		stack.push (5);
-		stack.push (4);
-		stack.push (3);
-		stack.push (2);
-		stack.push (1);
-		stack.push (0);
-	//	stack.push (0);stack.push (0);stack.push (0);stack.push (0);stack.push (0);stack.push (0);
-		
-		stack.print();
-		System.out.println("....");
-		stack.pop();
-		stack.print();
-		stack.pop();
-		stack.print();
-		stack.pop();
-		stack.print();
-		stack.pop();
-		stack.print();
-		stack.pop();
-		stack.print();
-		stack.pop();
-		stack.print();
-		stack.pop();
-		stack.print();
-	}
 }

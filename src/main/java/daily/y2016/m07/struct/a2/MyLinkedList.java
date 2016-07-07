@@ -1,11 +1,11 @@
-package daily.template.datastructures.ch03;
+package daily.y2016.m07.struct.a2;
 
 public class MyLinkedList<T> implements Iterable<T> {
-	
+
 	private static class Node<T> {
-		private T data;
-		private Node<T> prev;
-		private Node<T> next;
+		public T data;
+		public Node<T> prev;
+		public Node<T> next;
 		
 		public Node(T d, Node<T> p, Node<T> n) {
 			data = d;
@@ -35,21 +35,20 @@ public class MyLinkedList<T> implements Iterable<T> {
 		return theSize;
 	}
 	public boolean isEmpty() {
-		return size() == 0;
+		return size()==0;
 	}
-	
 	private Node<T> getNode(int idx) {
 		Node<T> p;
-		if(idx<0||idx>=size()) 
+		if(idx<0||idx>=size())
 			throw new IndexOutOfBoundsException();
 		
 		if(idx<size()/2) {
 			p = beginMarker.next;
-			for(int i=0;i<idx;i++) 
+			for(int i=0;i<idx;i++)
 				p = p.next;
 		} else {
 			p = endMarker;
-			for(int i=size();i>idx;i--) 
+			for(int i=size();i>idx;i--)
 				p = p.prev;
 		}
 		
@@ -94,11 +93,11 @@ public class MyLinkedList<T> implements Iterable<T> {
 	public T remove(int idx) {
 		return remove(getNode(idx));
 	}
-	
-	
+	  
 	public java.util.Iterator<T> iterator() {
 		return new LinkedListIterator();
 	}
+	
 	private class LinkedListIterator implements java.util.Iterator<T> {
 		
 		private Node<T> current = beginMarker.next;
@@ -106,13 +105,13 @@ public class MyLinkedList<T> implements Iterable<T> {
 		private boolean okToRemove = false;
 		
 		public boolean hasNext() {
-			return current != endMarker;
+			return current!=endMarker;
 		}
 		
 		public T next() {
-			if(modCount!=expectedModCount) 
+			if(modCount!=expectedModCount)
 				throw new java.util.ConcurrentModificationException();
-			if(!hasNext()) 
+			if(!hasNext())
 				throw new java.util.NoSuchElementException();
 			
 			T nextItem = current.data;
@@ -122,11 +121,10 @@ public class MyLinkedList<T> implements Iterable<T> {
 		}
 		
 		public void remove() {
-			if(modCount!=expectedModCount) 
+			if(modCount!=expectedModCount)
 				throw new java.util.ConcurrentModificationException();
-			if(!okToRemove) 
+			if(!okToRemove)
 				throw new IllegalStateException();
-			
 			MyLinkedList.this.remove(current.prev);
 			okToRemove = false;
 			expectedModCount++;

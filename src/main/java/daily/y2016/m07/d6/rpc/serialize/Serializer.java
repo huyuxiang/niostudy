@@ -1,4 +1,4 @@
-package daily.y2016.m4.d06.rpc.api;
+package daily.y2016.m07.d6.rpc.serialize;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -13,8 +13,10 @@ public class Serializer {
 
 	private static ThreadLocal<Kryo> kryoThreadLocal;
 	
-	static{
+	static {
+		
 		kryoThreadLocal = new ThreadLocal<Kryo>() {
+			
 			@Override
 			public Kryo initialValue() {
 				return new Kryo();
@@ -23,6 +25,7 @@ public class Serializer {
 	}
 	
 	public static byte[] serialize(Object object) throws SerializeException {
+		
 		if(object ==null) 
 			throw new SerializeException("object is null");
 		
@@ -31,17 +34,23 @@ public class Serializer {
 		Output output = new Output(stream);
 		kryo.writeObject(output, object);
 		output.close();
+		
 		return stream.toByteArray();
 	}
 	
 	public static <T> T deserialize(byte[] data, Class<T> clazz) throws SerializeException {
-		if(data==null || data.length ==0) {
-			throw new SerializeException("null");
+		
+		if(data ==null|| data.length==0) {
+			throw new SerializeException("data isnull");
 		}
 		
-		InputStream stream = new BufferedInputStream(new ByteArrayInputStream(data));
-		
+		Kryo kryo = kryoThreadLocal.get();
+		InputStream stream = new BufferedInputStream(
+				new ByteArrayInputStream(data));
 		Input input = new Input(stream);
-		return kryoThreadLocal.get().readObject(input, clazz);
+		T object = kryo.readObject(input, clazz);
+		input.close();
+		
+		return object;
 	}
 }

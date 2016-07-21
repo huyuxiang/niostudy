@@ -3,8 +3,8 @@ package daily.template.datastructures.ch04;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
-import daily.template.datastructures.ch03.MyQueue;
-import daily.template.datastructures.ch03.MyQueue.QueueNode;
+import daily.template.datastructures.ch03.MyArrayQueue;
+import daily.template.datastructures.ch03.MyArrayQueue.QueueNode;
 
 //checked 20160314
 public class BinarySearchTree<T extends Comparable<? super T>> {
@@ -50,19 +50,12 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 			throw new UnderflowException();
 		return findMax(root).element;
 	}
-	public  void insert(T x) {
+	public void insert(T x) {
 		root = insert(x, root);
 	}
 	public void remove(T x) {
 		root = remove(x, root);
 	}
-	public void printTree() {
-		if(isEmpty())
-			System.out.println("Empty tree");
-		else 
-			printTree(root);
-	}
-	
 	
 	private boolean contains(T x, BinaryNode<T> t) {
 		if(t == null)
@@ -124,6 +117,17 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 			t = (t.left!=null)?t.left:t.right;
 		return t;
 	}
+	
+	//------------
+	
+	public void printTree() {
+		if(isEmpty())
+			System.out.println("Empty tree");
+		else 
+			printTree(root);
+	}
+	
+	
 	private void printTree(BinaryNode<T> t) {
 		if(t!=null){
 			printTree(t.left);
@@ -145,7 +149,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 	private int maxFloorHold = -1;
 	static final int ELEMENT_HOLD = 4;
 	
-	private static MyQueue<BinaryNode> floorCacheQueue;
+	private static MyArrayQueue<BinaryNode> floorCacheQueue;
 	
 	private static ReentrantLock printLock = new ReentrantLock(true);
 	
@@ -155,7 +159,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 			throw new RuntimeException("print is call by others");
 		
 		maxHeight = height(root);
-		floorCacheQueue = new MyQueue((int) Math.pow(2, maxHeight+1) + 1);
+		floorCacheQueue = new MyArrayQueue((int) Math.pow(2, maxHeight+1) + 1);
 		maxFloorNum = (int) (Math.pow(2, maxHeight));//最底层满树下 多少个元素
 		maxFloorHold = maxFloorNum * ELEMENT_HOLD;//最底层占用空间
 		floorCacheQueue.offer(root);
@@ -181,7 +185,7 @@ public class BinarySearchTree<T extends Comparable<? super T>> {
 		
 		while(true) {
 			QueueNode<BinaryNode> queueNode = floorCacheQueue.poll();
-			if(queueNode.equals(MyQueue.NULL)) {
+			if(queueNode.equals(MyArrayQueue.NULL)) {
 				floorCacheQueue.offerSeperator();
 				printFloor(--height);
 				return ;

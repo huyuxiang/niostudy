@@ -4,9 +4,6 @@ public class MyLinkedStack<T> {
 
 	private static final int DEFAULT_CAPACITY = 10;
 	
-	private int theSize;
-	private Node<T> top;
-	
 	private static class Node<T> {
 		private Node<T> next;
 		private T data;
@@ -16,6 +13,9 @@ public class MyLinkedStack<T> {
 			data = x;
 		}
 	}
+	
+	private int theSize;
+	private Node<T> top;
 	
 	public MyLinkedStack() {
 		clear();

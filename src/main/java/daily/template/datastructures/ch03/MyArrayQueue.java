@@ -1,19 +1,12 @@
 package daily.template.datastructures.ch03;
-
 import java.util.Random;
-
 public class MyArrayQueue<T> {
 	
-	public static final int DEFAULT_SIZE = 10;
-	
-	private QueueNode[] items;
-	private int size;
-	
-	public MyArrayQueue() {
-		this(DEFAULT_SIZE);
-	}
+	private static final int DEFAULT_CAPACITY = 10;
 	
 	public static class QueueNode<T> {
+		public T element;
+		
 		public QueueNode() {
 			this(null);
 		}
@@ -21,8 +14,13 @@ public class MyArrayQueue<T> {
 		public QueueNode(T t) {
 			this.element = t;
 		}
-
-		public T element;
+	}
+	
+	private QueueNode[] items;
+	private int size;
+	
+	public MyArrayQueue() {
+		this(DEFAULT_CAPACITY);
 	}
 	
 	public MyArrayQueue(int size) {

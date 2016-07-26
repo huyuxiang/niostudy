@@ -1,4 +1,4 @@
-package daily.template.reactor.ReactorPool;
+package daily.y2016.m07.d26.c2;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,16 +9,12 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-//Basic Reactor Design
-//Single threaded version
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
-//reactor 1: setup
 public class MultipleReactor implements Runnable {
-	
-	public static void main(String args[] ) throws IOException {
+
+	public static void main(String args[]) throws IOException {
 		MultipleReactor server = new MultipleReactor(8000);
 		new Thread(server).start();
 	}
@@ -42,38 +38,37 @@ public class MultipleReactor implements Runnable {
 		for(int i=0;i<DEFAULT_WORKER_SIZE;i++) {
 			final Selector selector = Selector.open();
 			selectors[i] = selector;
-			workerpool.execute(new Runnable () {
+			workerpool.execute(new Runnable() {
 				@Override
 				public void run() {
 					try {
 						while(!Thread.interrupted()) {
 							selector.select(500);
-							Set set = selector.selectedKeys();
+							Set set =selector.selectedKeys ();
 							Iterator it = set.iterator();
 							while(it.hasNext()) 
 								dispatch((SelectionKey)(it.next()));
 							set.clear();
 						}
-					} catch(IOException ex) {
+					} catch(IOException e) {
+						
 					}
 				}
 			});
 		}
-		
 	}
 	
-//reactor 2: dispatch loop
-	public void run() { //normally in a new Thread
+	public void run() {
 		try {
 			while(!Thread.interrupted()) {
 				selector.select(500);
 				Set set = selector.selectedKeys();
 				Iterator it = set.iterator();
-				while(it.hasNext()) 
+				while(it.hasNext())
 					dispatch((SelectionKey)(it.next()));
 				set.clear();
 			}
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
@@ -84,26 +79,26 @@ public class MultipleReactor implements Runnable {
 			r.run();
 	}
 	
-	
-//reactor 3: acceptor
-	class Acceptor implements Runnable {//inner
+	class Acceptor implements Runnable{
 		public synchronized void run() {
-			SocketChannel socketChannel=null;
+			SocketChannel socketChannel = null;
 			try {
 				socketChannel = serverSocketChannel.accept();
-			} catch (IOException e1) {
+			} catch(IOException e) {
+				
 			}
-			if(socketChannel !=null)
+			if(socketChannel!=null)
 				try {
 					new Handler(selectors[next], socketChannel);
-				} catch (IOException e) {
+				} catch(IOException e) {
+					
 				}
-			if(++next==selectors.length) next= 0;
+			if(++next==selectors.length) next=0;
 		}
 	}
 }
+
 class Handler implements Runnable {
-	
 	int MAXIN = 1024;
 	int MAXOUT = 1024;
 	final SocketChannel socketChannel;
@@ -116,7 +111,6 @@ class Handler implements Runnable {
 	Handler(Selector selector, SocketChannel socketChannel) throws IOException {
 		this.socketChannel = socketChannel;
 		socketChannel.configureBlocking(false);
-		//Optionally try first read now
 		selectionKey = socketChannel.register(selector, 0);
 		selectionKey.attach(this);
 		selectionKey.interestOps(SelectionKey.OP_READ);
@@ -125,11 +119,11 @@ class Handler implements Runnable {
 	
 	public void run() {
 		try {
-			if(state == READING) 
+			if(state==READING)
 				read();
-			else if(state == SENDING) 
+			else if(state ==SENDING)
 				send();
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
@@ -137,11 +131,10 @@ class Handler implements Runnable {
 	void send() throws IOException {
 		output = output.put("send()".getBytes());
 		socketChannel.write(output);
-		if(outputIsComplete()) 
+		if(outputIsComplete())
 			selectionKey.cancel();
 	}
 	
-	//uses util.concurrent thread pool
 	static ExecutorService pool = Executors.newFixedThreadPool(10);
 	static final int PROCESSING = 3;
 	
@@ -164,23 +157,19 @@ class Handler implements Runnable {
 	}
 	
 	synchronized void processAndHandOff() {
-		process();
-		state = SENDING;//or rebind attachment
-		selectionKey.interestOps(SelectionKey.OP_WRITE);
+		process() ;
+		state = SENDING;
+		selectionKey.interestOps(SelectionKey.OP_WRITE); 
 	}
 	
 	boolean inputIsComplete() {
-		System.out.println("inputIsComplete()");
 		return true;
 	}
 	
 	boolean outputIsComplete() {
-		System.out.println("outputIsComplete()");
 		return true;
 	}
 	
 	void process() {
-		System.out.println("process()");
 	}
-	
 }

@@ -1,4 +1,4 @@
-package daily.template.reactor.Multithreaded;
+package daily.y2016.m07.d26.c1;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,15 +12,11 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import daily.template.reactor.ReactorPool.MultipleReactor;
+public class MultithreadedReactor implements Runnable  {
 
-
-//reactor 1: setup
-public class MultithreadedReactor implements Runnable {
-	
-	public static void main(String args[] ) throws IOException {
-		MultithreadedReactor server = new MultithreadedReactor(8000);
-		new Thread(server).start();
+	public static void main(String[] args) throws IOException {
+		MultithreadedReactor reactor = new MultithreadedReactor(8000);
+		new Thread(reactor).start();
 	}
 	
 	final Selector selector;
@@ -35,42 +31,34 @@ public class MultithreadedReactor implements Runnable {
 		selectionKey.attach(new Acceptor());
 	}
 	
-	/*
-	 Alternatively, use explicit SPI provider:
-	 	SelectorProvider p = SelectorProvider.provider();
-	 	selector = p.openSelector();
-	 	serverSocket = p.openServerSocketChannel();
-	 */
-	
-//reactor 2: dispatch loop
-	public void run() { //normally in a new Thread
+	public void run() {
 		try {
 			while(!Thread.interrupted()) {
 				selector.select();
 				Set set = selector.selectedKeys();
 				Iterator it = set.iterator();
-				while(it.hasNext()) 
+				while(it.hasNext())
 					dispatch((SelectionKey)(it.next()));
 				set.clear();
 			}
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
 	
 	void dispatch(SelectionKey selectionKey) {
 		Runnable r = (Runnable) (selectionKey.attachment());
-		if(r!=null) 
+		if(r!=null)
 			r.run();
 	}
-//reactor 3: acceptor
-	class Acceptor implements Runnable {//inner
+	
+	class Acceptor implements Runnable {
 		public void run() {
 			try {
 				SocketChannel socketChannel = serverSocketChannel.accept();
-				if(socketChannel !=null) 
+				if(socketChannel!=null)
 					new Handler(selector, socketChannel);
-			} catch(IOException ex) {
+			} catch(IOException e) {
 				
 			}
 		}
@@ -78,22 +66,20 @@ public class MultithreadedReactor implements Runnable {
 }
 
 class Handler implements Runnable {
-	
 	int MAXIN = 1024;
 	int MAXOUT = 1024;
 	final SocketChannel socketChannel;
 	final SelectionKey selectionKey;
 	ByteBuffer input = ByteBuffer.allocate(MAXIN);
 	ByteBuffer output = ByteBuffer.allocate(MAXOUT);
-	static final int READING = 0, SENDING = 1;
-	int state = READING;
+	static final int READING = 0,SENDING = 1;
+	int state = READING ;
 	Selector selector;
 	
 	Handler(Selector selector, SocketChannel sc) throws IOException {
 		socketChannel = sc;
 		this.selector = selector;
 		socketChannel.configureBlocking(false);
-		//Optionally try first read now
 		selectionKey = socketChannel.register(selector, 0);
 		selectionKey.attach(this);
 		selectionKey.interestOps(SelectionKey.OP_READ);
@@ -102,22 +88,21 @@ class Handler implements Runnable {
 	
 	public void run() {
 		try {
-			if(state == READING) 
+			if(state==READING)
 				read();
-			else if(state == SENDING) 
+			else if(state==SENDING)
 				send();
-		} catch(IOException ex) {
+		} catch(IOException e) {
 			
 		}
 	}
 	
 	void send() throws IOException {
 		socketChannel.write(output);
-		if(outputIsComplete()) 
+		if(outputIsComplete())
 			selectionKey.cancel();
 	}
 	
-	//uses util.concurrent thread pool
 	static ExecutorService pool = Executors.newFixedThreadPool(10);
 	static final int PROCESSING = 3;
 	
@@ -130,29 +115,27 @@ class Handler implements Runnable {
 	}
 	
 	class Processer implements Runnable {
-		public void run() {
+		public void run() { 
 			processAndHandOff();
 		}
 	}
 	
 	synchronized void processAndHandOff() {
 		process();
-		state = SENDING;//or rebind attachment
+		state = SENDING;
 		selectionKey.interestOps(SelectionKey.OP_WRITE);
 		selector.wakeup();
 	}
 	
 	boolean inputIsComplete() {
-		System.out.println("inputIsComplete()");
 		return true;
 	}
 	
 	boolean outputIsComplete() {
-		System.out.println("outputIsComplete()");
 		return true;
 	}
 	
 	void process() {
-		System.out.println("process()");
+		
 	}
 }

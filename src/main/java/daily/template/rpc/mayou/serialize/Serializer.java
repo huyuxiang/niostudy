@@ -24,13 +24,13 @@ public class Serializer {
 		};
 	}
 	
-	public static byte[] serialize(Object object) throws SerializeException {
+	public static byte[] serialize(Object object) {
 		if (object == null) {
-			throw new SerializeException("指向object对象指针为空");
+			throw new RuntimeException("指向object对象指针为空");
 		}
 
 		Kryo kryo = kryoThreadLocal.get();
-		ByteArrayOutputStream stream = new ByteArrayOutputStream(2000);
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		Output output = new Output(stream);
 		kryo.writeObject(output, object);
 		output.close();
@@ -38,9 +38,9 @@ public class Serializer {
 		return stream.toByteArray();
 	}
 	
-	public static <T> T deserialize(byte[] data, Class<T> clazz) throws SerializeException {
+	public static <T> T deserialize(byte[] data, Class<T> clazz) {
 		if (data == null || data.length == 0) {
-			throw new SerializeException("数据为空");
+			throw new RuntimeException("数据为空");
 		}
 
 		Kryo kryo = kryoThreadLocal.get();

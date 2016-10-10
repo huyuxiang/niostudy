@@ -18,7 +18,7 @@ public class ProxyFactory {
 	public static Object getConsumerProxy(Class<?> clazz, String ip) {
 		Object obj = clazzMap.get(clazz);
 		if (obj == null) {
-			synchronized (clazz) {
+			synchronized (clazzMap) {
 				obj = clazzMap.get(clazz);
 				if(obj !=null) {
 					return obj;

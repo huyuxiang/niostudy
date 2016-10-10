@@ -70,8 +70,8 @@ public class Server {
 			isStart = true;
 
 			channelFactory = new NioServerSocketChannelFactory(
-					Executors.newFixedThreadPool(2),
-					Executors.newFixedThreadPool(9), 8);
+					Executors.newFixedThreadPool(1),
+					Executors.newFixedThreadPool(8), 8);
 			serverBootstrap = new ServerBootstrap(channelFactory);
 			serverBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 
@@ -98,7 +98,7 @@ public class Server {
 				});
 			}
 		} else {
-			throw new ServerStartException();
+			throw new RuntimeException("server started");
 		}
 	}
 
@@ -138,7 +138,7 @@ public class Server {
 			deques.get((int) (pos.getAndIncrement() % 8)).offerLast(Entry.<Channel, byte[]> 
 			getEntry(channel, parameters));
 		} else {
-			throw new ServerStopException();
+			throw new RuntimeException("server stoped");
 		}
 	}
 

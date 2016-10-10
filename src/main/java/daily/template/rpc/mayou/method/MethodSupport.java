@@ -25,23 +25,21 @@ public class MethodSupport {
 			new ConcurrentHashMap<String, FastClassWrapper>();
 	
 	public Object invoke(String methodName, Class<?>[] types,
-			Object[] parameters) throws InvocationTargetException,
-			MethodUnRegisterException {
+			Object[] parameters) throws InvocationTargetException {
 		FastClassWrapper wrapper = fastClassMap.get(methodName.substring(0,
 				methodName.lastIndexOf('.')));
 		if(wrapper == null){
-			throw new MethodUnRegisterException("方法所在实现类尚未注册，methodName:" + methodName);
+			throw new RuntimeException("方法所在实现类尚未注册，methodName:" + methodName);
 		}
 		return wrapper.fastClass.invoke(
 				methodName.substring(methodName.lastIndexOf('.') + 1,
 						methodName.length()), types, wrapper.obj, parameters);
 	}
-
+	
 	public void register(String className, Object impl) {
 		FastClass clazz = FastClass.create(impl.getClass());
 		FastClassWrapper wrapper = new FastClassWrapper(clazz, impl);
 		fastClassMap.putIfAbsent(className, wrapper);
 	}
-
-
+	
 }

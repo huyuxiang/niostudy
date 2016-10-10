@@ -41,13 +41,13 @@ public class Client {
 
 	public synchronized void start() {
 		if (isStart) {
-			throw new ClientStartException();
+			throw new RuntimeException("client not started");
 		} else {
 			isStart = true;
 
 			channelFactory = new NioClientSocketChannelFactory(
-					Executors.newFixedThreadPool(10),
-					Executors.newFixedThreadPool(10), 2, 8);
+					Executors.newFixedThreadPool(1),
+					Executors.newFixedThreadPool(8), 1, 8);
 
 			clientBootstrap = new ClientBootstrap(channelFactory);
 			clientBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
@@ -65,7 +65,7 @@ public class Client {
 
 	public synchronized void stop() {
 		if (!isStart) {
-			throw new ClientStopException();
+			throw new RuntimeException("client not started");
 		} else {
 			isStart = false;
 		}
@@ -78,7 +78,7 @@ public class Client {
 				channel.notify();
 			}
 		} else {
-			throw new ClientStopException();
+			throw new RuntimeException("client not started");
 		}
 	}
 
@@ -88,16 +88,7 @@ public class Client {
 			resultMap.remove(channel);
 			return result;
 		} else {
-			throw new ClientStopException();
-		}
-	}
-
-	public ChannelFuture getConnection() {
-		if (isStart) {
-			return clientBootstrap
-					.connect(new InetSocketAddress(remoteAddress, port));
-		} else {
-			throw new ClientStopException();
+			throw new RuntimeException("client not started");
 		}
 	}
 
@@ -106,7 +97,7 @@ public class Client {
 			return clientBootstrap
 					.connect(new InetSocketAddress(remoteAddress, port));
 		} else {
-			throw new ClientStopException();
+			throw new RuntimeException("client not started");
 		}
 	}
 

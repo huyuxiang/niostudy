@@ -2,6 +2,7 @@ package daily.template.datastructures.ch06;
 
 import daily.template.datastructures.ch04.UnderflowException;
 
+//小顶堆
 public class BinaryHeap<T extends Comparable<? super T>> {
 	
 	private static final int DEFAULT_CAPACITY = 10;

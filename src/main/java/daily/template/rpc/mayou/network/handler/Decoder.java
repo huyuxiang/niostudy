@@ -32,3 +32,12 @@ public class Decoder extends ReplayingDecoder<DecodeState> {
 	}
 
 }
+
+enum DecodeState {
+
+	READ_LENGTH,
+	
+	READ_CONTENT
+	
+}
+

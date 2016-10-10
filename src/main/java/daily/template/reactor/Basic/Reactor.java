@@ -26,7 +26,7 @@ public class Reactor implements Runnable {
 	Reactor(int port) throws IOException {
 		selector = Selector.open();
 		serverSocketChannel = ServerSocketChannel.open();
-		serverSocketChannel.socket().bind(new InetSocketAddress(port));
+		serverSocketChannel.socket().bind(new InetSocketAddress(port), 1024);
 		serverSocketChannel.configureBlocking(false);
 		SelectionKey selectionKey = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 		selectionKey.attach(new Acceptor());

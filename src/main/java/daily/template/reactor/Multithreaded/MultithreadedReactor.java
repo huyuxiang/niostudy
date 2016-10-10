@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import daily.template.reactor.ReactorPool.MultipleReactor;
-
 
 //reactor 1: setup
 public class MultithreadedReactor implements Runnable {
